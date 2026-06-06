@@ -600,6 +600,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
+  cursor: default;
 }
 
 .home-gradient {
@@ -608,8 +609,18 @@ body {
   background: #75b2f0;
 }
 
-.home-gradient-blob {
+.home-gradient-blob-wrap {
   position: absolute;
+  pointer-events: none;
+}
+
+.home-gradient-blob-wrap--sky { top: -25%; left: -15%; }
+.home-gradient-blob-wrap--azure { top: 10%; right: -20%; }
+.home-gradient-blob-wrap--cyan { bottom: 5%; left: 20%; }
+.home-gradient-blob-wrap--glow { top: 35%; left: 35%; }
+.home-gradient-blob-wrap--deep { bottom: -18%; left: -10%; width: 100%; }
+
+.home-gradient-blob {
   border-radius: 50%;
   filter: blur(72px);
   will-change: transform;
@@ -618,77 +629,104 @@ body {
 .home-gradient-blob--sky {
   width: 90vmax;
   height: 90vmax;
-  top: -25%;
-  left: -15%;
   background: radial-gradient(circle, #9ecbf8 0%, #75b2f0 55%, transparent 72%);
-  animation: home-drift-a 22s ease-in-out infinite;
+  animation: home-drift-a 20s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .home-gradient-blob--azure {
   width: 70vmax;
   height: 70vmax;
-  top: 10%;
-  right: -20%;
   background: radial-gradient(circle, #1e90ff 0%, #007fff 45%, transparent 70%);
-  animation: home-drift-b 26s ease-in-out infinite;
+  animation: home-drift-b 24s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .home-gradient-blob--cyan {
   width: 55vmax;
   height: 55vmax;
-  bottom: 5%;
-  left: 20%;
   background: radial-gradient(circle, #00f5ff 0%, #40e0d0 40%, transparent 68%);
-  animation: home-drift-c 18s ease-in-out infinite;
+  animation: home-drift-c 18s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .home-gradient-blob--glow {
   width: 45vmax;
   height: 45vmax;
-  top: 35%;
-  left: 35%;
   background: radial-gradient(circle, rgba(94, 231, 255, 0.95) 0%, rgba(0, 245, 255, 0.35) 35%, transparent 65%);
-  animation: home-drift-d 14s ease-in-out infinite;
+  animation: home-drift-d 14s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .home-gradient-blob--deep {
   width: 100vmax;
   height: 40vmax;
-  bottom: -18%;
-  left: -10%;
   background: radial-gradient(ellipse, #0a1628 0%, rgba(10, 22, 40, 0.55) 35%, transparent 70%);
   filter: blur(48px);
-  animation: home-drift-e 30s ease-in-out infinite;
+  animation: home-drift-e 48s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.home-gradient-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.55;
+  mix-blend-mode: soft-light;
+  animation: home-grain 0.5s steps(6) infinite;
+}
+
+.home-gradient-grain svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes home-grain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-1.5%, -2%); }
+  40% { transform: translate(2%, 1%); }
+  60% { transform: translate(-1%, 2%); }
+  80% { transform: translate(1.5%, -1.5%); }
 }
 
 @keyframes home-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(8%, 6%) scale(1.08); }
+  25% { transform: translate(6%, 4%) scale(1.05); }
+  50% { transform: translate(10%, 8%) scale(1.1); }
+  75% { transform: translate(3%, 6%) scale(1.04); }
 }
 
 @keyframes home-drift-b {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-10%, 8%) scale(1.12); }
+  25% { transform: translate(-6%, 5%) scale(1.06); }
+  50% { transform: translate(-12%, 9%) scale(1.14); }
+  75% { transform: translate(-4%, 4%) scale(1.05); }
 }
 
 @keyframes home-drift-c {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(12%, -10%) scale(1.06); }
+  25% { transform: translate(8%, -6%) scale(1.04); }
+  50% { transform: translate(14%, -11%) scale(1.08); }
+  75% { transform: translate(5%, -5%) scale(1.03); }
 }
 
 @keyframes home-drift-d {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
-  33% { transform: translate(8%, -12%) scale(1.15); opacity: 1; }
-  66% { transform: translate(-8%, 6%) scale(0.92); opacity: 0.9; }
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.82; }
+  20% { transform: translate(6%, -8%) scale(1.1); opacity: 0.95; }
+  45% { transform: translate(10%, -14%) scale(1.18); opacity: 1; }
+  70% { transform: translate(-6%, 5%) scale(0.94); opacity: 0.88; }
+  90% { transform: translate(-3%, 8%) scale(1.02); opacity: 0.92; }
 }
 
 @keyframes home-drift-e {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(5%, -4%); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(4%, -3%) scale(1.02); }
+  66% { transform: translate(7%, -5%) scale(1.04); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home-gradient-blob {
+    animation: none;
+  }
+
+  .home-gradient-grain {
     animation: none;
   }
 }
