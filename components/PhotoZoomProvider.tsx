@@ -6,7 +6,7 @@ const ZOOM_KEY = 'photo-grid-zoom'
 const COLOR_SORT_KEY = 'photo-grid-color-sort'
 const SHUFFLE_SEED_KEY = 'photo-grid-shuffle-seed'
 
-export const DEFAULT_ZOOM = 50
+export const DEFAULT_ZOOM = 0
 
 export type PhotoGridSettings = {
   columns: number
