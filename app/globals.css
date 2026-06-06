@@ -21,6 +21,19 @@ body {
   font-family: 'Libre Franklin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.site-nav-link--home {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.site-nav-link--home:hover {
+  color: #fff;
+}
+
+.site-nav-link--home.site-nav-link--active {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
 .site-nav-link {
   font-size: 11px;
   font-weight: 400;
@@ -578,6 +591,105 @@ body {
 
   .admin-header {
     flex-direction: column;
+  }
+}
+
+/* ─── Home gradient ─────────────────────────────────────────────────── */
+.home-gradient-page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.home-gradient {
+  position: fixed;
+  inset: 0;
+  background: #75b2f0;
+}
+
+.home-gradient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  will-change: transform;
+}
+
+.home-gradient-blob--sky {
+  width: 90vmax;
+  height: 90vmax;
+  top: -25%;
+  left: -15%;
+  background: radial-gradient(circle, #9ecbf8 0%, #75b2f0 55%, transparent 72%);
+  animation: home-drift-a 22s ease-in-out infinite;
+}
+
+.home-gradient-blob--azure {
+  width: 70vmax;
+  height: 70vmax;
+  top: 10%;
+  right: -20%;
+  background: radial-gradient(circle, #1e90ff 0%, #007fff 45%, transparent 70%);
+  animation: home-drift-b 26s ease-in-out infinite;
+}
+
+.home-gradient-blob--cyan {
+  width: 55vmax;
+  height: 55vmax;
+  bottom: 5%;
+  left: 20%;
+  background: radial-gradient(circle, #00f5ff 0%, #40e0d0 40%, transparent 68%);
+  animation: home-drift-c 18s ease-in-out infinite;
+}
+
+.home-gradient-blob--glow {
+  width: 45vmax;
+  height: 45vmax;
+  top: 35%;
+  left: 35%;
+  background: radial-gradient(circle, rgba(94, 231, 255, 0.95) 0%, rgba(0, 245, 255, 0.35) 35%, transparent 65%);
+  animation: home-drift-d 14s ease-in-out infinite;
+}
+
+.home-gradient-blob--deep {
+  width: 100vmax;
+  height: 40vmax;
+  bottom: -18%;
+  left: -10%;
+  background: radial-gradient(ellipse, #0a1628 0%, rgba(10, 22, 40, 0.55) 35%, transparent 70%);
+  filter: blur(48px);
+  animation: home-drift-e 30s ease-in-out infinite;
+}
+
+@keyframes home-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8%, 6%) scale(1.08); }
+}
+
+@keyframes home-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10%, 8%) scale(1.12); }
+}
+
+@keyframes home-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(12%, -10%) scale(1.06); }
+}
+
+@keyframes home-drift-d {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
+  33% { transform: translate(8%, -12%) scale(1.15); opacity: 1; }
+  66% { transform: translate(-8%, 6%) scale(0.92); opacity: 0.9; }
+}
+
+@keyframes home-drift-e {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(5%, -4%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-gradient-blob {
+    animation: none;
   }
 }
 

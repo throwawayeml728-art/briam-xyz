@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import HomeGradient from '@/components/HomeGradient'
 
 export default function Home() {
-  redirect('/photos')
+  return <HomeGradient />
 }
