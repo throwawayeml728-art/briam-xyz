@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import type { Photo } from '@/data/content'
-import { analyzePhotoWarmthFromSrc } from '@/lib/photo-warmth'
 
 const PHOTOS_JSON = path.join(process.cwd(), 'data/photos.json')
 const PHOTOS_DIR = path.join(process.cwd(), 'public/photos')
@@ -34,6 +33,7 @@ export function addPhoto(photo: Photo): Photo {
 export async function addPhotoWithWarmth(
   photo: Omit<Photo, 'warmth'>,
 ): Promise<Photo> {
+  const { analyzePhotoWarmthFromSrc } = await import('@/lib/photo-warmth')
   const warmth = await analyzePhotoWarmthFromSrc(photo.src)
   const full: Photo = {
     ...photo,
