@@ -33,6 +33,8 @@ export type Photo = {
 // ─── SITE CONFIG ─────────────────────────────────────────────────────
 export const siteConfig = {
   name: 'Brian Landauer',
+  tagline: 'Builder, photographer, curious person.',
+  location: 'New York City',
   domain: 'fifthdegree.xyz',
   url: 'https://fifthdegree.xyz',
   email: 'hello@fifthdegree.xyz',

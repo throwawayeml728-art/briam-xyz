@@ -25,13 +25,13 @@ export default function Nav() {
         alignItems: 'center',
         justifyContent: 'flex-end',
         height: '60px',
-        background: isHome ? 'transparent' : 'rgba(250,250,248,0.92)',
-        backdropFilter: isHome ? 'none' : 'blur(12px)',
-        borderBottom: isHome ? 'none' : '1px solid #e8e8e4',
+        background: isHome ? undefined : 'rgba(250,250,248,0.92)',
+        backdropFilter: isHome ? undefined : 'blur(12px)',
+        borderBottom: isHome ? undefined : '1px solid #e8e8e4',
       }}
     >
       <ul className="site-nav-links" style={{ display: 'flex', gap: '32px', listStyle: 'none', margin: 0, padding: 0 }}>
-        {links.map(([label, href]) => {
+        {links.filter(([, href]) => !isHome || href !== '/').map(([label, href]) => {
           const active = href === '/'
             ? pathname === '/'
             : pathname === href || pathname.startsWith(`${href}/`)
