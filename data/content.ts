@@ -3,17 +3,6 @@
 // No design knowledge needed — just add/edit entries below.
 // ─────────────────────────────────────────────────────────────────────
 
-export type Clipping = {
-  slug: string
-  tag: string
-  title: string
-  desc: string
-  image: string        // Cloudinary URL or local /public path
-  sourceUrl?: string   // Link to original article, tweet, etc.
-  date?: string        // e.g. "Mar 2026"
-  ratio?: string       // e.g. "3/4", "4/3", "16/10"
-}
-
 export type Project = {
   name: string
   desc: string
@@ -44,40 +33,6 @@ export const siteConfig = {
     linkedin: 'https://linkedin.com/in/brian-landauer',
     luma: 'https://luma.com/user/usr-Eh8dQi5q7sejAW6',
   },
-}
-
-// ─── COOL STUFF (CLIPPINGS) ──────────────────────────────────────────
-// Add a new clipping whenever you save something cool.
-// Drop the image in Cloudinary (or /public) and paste the URL below.
-export const clippings: Clipping[] = [
-  {
-    slug: 'fabrizia-pistachio',
-    tag: 'Food',
-    title: 'Fabrizia Crema di Pistacchio',
-    desc: 'Toasted pistachios and real cream in a bottle. All natural, serve chilled — one of those finds you keep coming back to.',
-    image: '/clippings/fabrizia-pistachio.png',
-    sourceUrl: 'https://www.fabriziaspirits.com/our-products/',
-    ratio: '3/4',
-    date: 'Jun 2026',
-  },
-  {
-    slug: 'omou-minimal-gmail',
-    tag: 'Design',
-    title: 'omou — minimal Gmail',
-    desc: 'A clipping from omou.app. Calm interfaces, shortcuts-first, cuts the noise. Exactly the kind of simple styling worth saving.',
-    image: '/clippings/omou-test.svg',
-    sourceUrl: 'https://omou.app',
-    ratio: '4/3',
-    date: 'Jun 2026',
-  },
-]
-
-export function getClippingBySlug(slug: string): Clipping | undefined {
-  return clippings.find(c => c.slug === slug)
-}
-
-export function getClippingIndex(slug: string): number {
-  return clippings.findIndex(c => c.slug === slug)
 }
 
 // ─── PROJECTS ────────────────────────────────────────────────────────

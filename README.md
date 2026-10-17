@@ -15,7 +15,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 **Everything you need to edit lives in one file: `data/content.ts`**
 
-- Add a new clipping → add an entry to `clippings[]` in `data/content.ts`
 - Add a project → add an entry to `projects[]`
 - Add photos → use the admin UI at `/admin/photos` (or edit `data/photos.json` directly)
 

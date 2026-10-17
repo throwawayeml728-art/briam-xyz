@@ -246,20 +246,6 @@ body {
   font-style: italic;
 }
 
-.clippings-grid {
-  columns: 3;
-  column-gap: 16px;
-}
-
-.clippings-grid > * {
-  display: inline-block;
-  width: 100%;
-}
-
-.clipping-card:hover {
-  box-shadow: 0 4px 16px rgba(26,26,24,0.1), 0 12px 32px rgba(26,26,24,0.08) !important;
-}
-
 .photo-lightbox {
   position: fixed;
   inset: 0;
@@ -351,14 +337,6 @@ body {
     padding: 16px;
   }
 
-  .clippings-grid {
-    columns: 2;
-  }
-
-  .clipping-detail {
-    padding: 72px 24px 80px !important;
-  }
-
   .project-row {
     flex-wrap: wrap;
   }
@@ -376,10 +354,6 @@ body {
 @media (max-width: 480px) {
   .site-nav-links {
     display: none !important;
-  }
-
-  .clippings-grid {
-    columns: 1;
   }
 }
 
