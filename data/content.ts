@@ -8,9 +8,8 @@ export type Project = {
   desc: string
   year: string                 // e.g. "2025" or "2025–"
   url?: string                 // omit if there is nothing to link to yet
-  status?: 'live' | 'in progress' | 'archived'
-  tags?: string[]              // e.g. ['AI', 'iOS']
-  image?: string               // optional screenshot: /public path or Cloudinary URL
+  status?: 'in progress'       // optional; shown as plain text only when meaningful
+  image?: string               // optional screenshot, shown on hover (desktop) / below row (mobile)
 }
 
 export type Photo = {
@@ -36,39 +35,34 @@ export const siteConfig = {
 }
 
 // ─── PROJECTS ────────────────────────────────────────────────────────
-// AI-built apps. To add one, copy an entry below and paste it at the TOP of
-// the list (newest first). Only name, desc and year are required:
+// To add a project, copy an entry and paste it at the TOP (newest first).
+// Only name, desc and year are required:
 //   {
 //     name: 'My App',
 //     desc: 'One sentence about what it does.',
-//     year: '2026',
-//     url: 'https://example.com',          // optional
-//     status: 'live',                      // optional: 'live' | 'in progress' | 'archived'
-//     tags: ['AI', 'Next.js'],             // optional
-//     image: '/projects/my-app.png',       // optional screenshot in /public/projects
+//     year: '2026',                        // or '2025–' for ongoing
+//     url: 'https://example.com',          // optional; row becomes a link
+//     status: 'in progress',               // optional; plain text, only if meaningful
+//     image: '/projects/my-app.webp',      // optional screenshot (3:2 works best) in /public/projects
 //   },
+// Entries without an image render as a clean typographic row.
 export const projects: Project[] = [
   {
     name: 'FrameCoach',
     desc: 'AI-powered iPhone app for real-time photography composition coaching.',
     year: '2025–',
     status: 'in progress',
-    tags: ['AI', 'iOS', 'Photography'],
   },
   {
     name: 'NYC Thirdspace Community',
     desc: 'A tradfi-crypto bridge community rooted in the Thirdspace concept.',
     year: '2025',
     url: 'https://luma.com/user/usr-Eh8dQi5q7sejAW6',
-    status: 'live',
-    tags: ['Community'],
   },
   {
     name: 'World Map Explorer',
     desc: 'Interactive world map with country exploration and quiz features. Built with Next.js.',
     year: '2025',
-    status: 'live',
-    tags: ['Next.js', 'Maps'],
   },
 ]
 

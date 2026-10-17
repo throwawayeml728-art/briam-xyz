@@ -44,7 +44,6 @@ body {
 
 .site-nav-link:focus-visible,
 .site-footer a:focus-visible,
-.project-row--link:focus-visible,
 .photo-tile:focus-visible,
 .photo-lightbox button:focus-visible,
 .photo-zoom-slider:focus-visible,
@@ -361,18 +360,9 @@ body {
     padding: 16px;
   }
 
-  .project-row {
-    flex-wrap: wrap;
-  }
-
-  .project-thumb {
-    width: 100% !important;
-    height: 180px !important;
-  }
-
-  .project-arrow {
-    display: none;
-  }
+  .project-row { grid-template-columns: 56px 1fr !important; padding: 22px 0 !important; }
+  .project-note { grid-column: 2; margin-top: 8px; }
+  .project-image { margin-left: 56px; }
 }
 
 @media (max-width: 480px) {
@@ -731,29 +721,49 @@ body {
   pointer-events: none;
 }
 
-/* ─── Projects list ─────────────────────────────────────────────────── */
+/* ─── Projects index ────────────────────────────────────────────────── */
+.project-list { margin: 0; padding: 0; list-style: none; }
+.project-item { position: relative; border-bottom: 1px solid #e8e8e4; }
 .project-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-  padding: 28px 0;
-  border-bottom: 1px solid #e8e8e4;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  column-gap: 24px;
+  align-items: baseline;
+  padding: 26px 0;
   color: inherit;
   text-decoration: none;
-  transition: opacity 0.2s, padding-left 0.25s;
 }
-.project-row--link:hover { opacity: 0.65; padding-left: 6px; }
-.project-thumb { position: relative; width: 160px; height: 104px; flex: none; border-radius: 4px; overflow: hidden; background: #f0ede8; }
-.project-main { flex: 1; min-width: 0; }
-.project-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-.project-year { font-size: 13px; color: #6b6b66; font-weight: 400; }
-.project-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; }
-.project-dot { width: 6px; height: 6px; border-radius: 50%; }
-.project-name { font-family: var(--font-serif), Georgia, serif; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; color: #1a1a18; margin: 0 0 6px; font-weight: 400; }
-.project-desc { font-size: 13px; color: #6b6b66; font-weight: 400; max-width: 520px; margin: 0; line-height: 1.55; }
-.project-tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 12px 0 0; }
-.project-tags li { font-size: 12px; letter-spacing: 0; text-transform: none; color: #6b6b66; border: 1px solid #e0e0da; border-radius: 999px; padding: 3px 10px; }
-.project-arrow { font-size: 20px; color: #6b6b66; margin-top: 4px; }
+.project-year { font-size: 13px; color: #6b6b66; font-variant-numeric: tabular-nums; }
+.project-name {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 22px; line-height: 1.25; letter-spacing: -0.02em;
+  color: #1a1a18; margin: 0; font-weight: 400;
+}
+.project-name span {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.3s ease;
+}
+.project-row--link:hover .project-name span,
+.project-row--link:focus-visible .project-name span { background-size: 100% 1px; }
+.project-desc { font-size: 13px; color: #6b6b66; max-width: 520px; margin: 6px 0 0; line-height: 1.6; }
+.project-note { font-size: 13px; color: #6b6b66; white-space: nowrap; }
+.project-row--link:focus-visible { outline: 2px solid #1a1a18; outline-offset: 4px; }
+/* image: inline below row on touch / small screens, floating reveal on hover-capable desktops */
+.project-image { position: relative; display: block; aspect-ratio: 3 / 2; margin: 0 0 24px 80px; max-width: 420px; overflow: hidden; background: #f0ede8; }
+@media (hover: hover) and (min-width: 769px) {
+  .project-image {
+    position: absolute; right: 0; top: 50%; width: 240px; margin: 0; z-index: 2;
+    transform: translateY(-50%); opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .project-item:hover .project-image,
+  .project-item:focus-within .project-image { opacity: 1; }
+  .project-item--image:hover .project-note,
+  .project-item--image:focus-within .project-note { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-image, .project-name span { transition: none; }
+}
 
 .page-main > * { width: 100%; }
 .page-main > .photo-section, .page-main > .site-section { margin-left: auto; margin-right: auto; }
