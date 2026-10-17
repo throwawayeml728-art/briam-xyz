@@ -201,10 +201,14 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
             className="photo-lightbox-content"
             onClick={e => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={active.src}
               alt={active.alt}
+              width={lightboxSize(active.ratio).w}
+              height={lightboxSize(active.ratio).h}
+              sizes="95vw"
+              quality={85}
+              priority
               className="photo-lightbox-image"
             />
             {active.location && (
@@ -218,11 +222,18 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
   )
 }
 
+function lightboxSize(ratio?: string) {
+  const [a, b] = (ratio || '3/4').split('/').map(Number)
+  const r = a && b ? a / b : 0.75
+  return r >= 1 ? { w: 2000, h: Math.round(2000 / r) } : { w: Math.round(1600 * r), h: 1600 }
+}
+
 function PhotoTile({ photo, onOpen }: { photo: Photo; onOpen: () => void }) {
   return (
     <div
       role="button"
       tabIndex={0}
+      aria-label={`Open photo: ${photo.alt}`}
       className="photo-tile"
       onClick={onOpen}
       onKeyDown={e => {

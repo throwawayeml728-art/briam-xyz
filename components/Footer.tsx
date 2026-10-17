@@ -1,5 +1,3 @@
-'use client'
-
 import { siteConfig } from '@/data/content'
 
 const socialLinks = [
@@ -10,42 +8,26 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer
-      className="site-footer"
-      style={{
-        borderTop: '1px solid #e8e8e4',
-        maxWidth: '1100px',
-        margin: '0 auto',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
-    >
-      <p style={{ fontSize: '12px', color: '#888884', fontWeight: 300 }}>
+    <footer className="site-footer">
+      <p className="site-footer-copy">
         © {new Date().getFullYear()} {siteConfig.name} · {siteConfig.domain}
       </p>
-      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-        {socialLinks.map(([label, href]) => (
-          <a
-            key={label}
-            href={href}
-            target={href.startsWith('mailto:') ? undefined : '_blank'}
-            rel={href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-            style={{
-              fontSize: '11px',
-              color: '#888884',
-              textDecoration: 'none',
-              letterSpacing: '0.07em',
-              textTransform: 'uppercase',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#1a1a18')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#888884')}
-          >
-            {label}
-          </a>
-        ))}
-      </div>
+      <nav className="site-footer-links" aria-label="Social links">
+        {socialLinks.map(([label, href]) => {
+          const external = !href.startsWith('mailto:')
+          return (
+            <a
+              key={label}
+              href={href}
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener noreferrer' : undefined}
+            >
+              {label}
+              {external && <span className="sr-only"> (opens in a new tab)</span>}
+            </a>
+          )
+        })}
+      </nav>
     </footer>
   )
 }

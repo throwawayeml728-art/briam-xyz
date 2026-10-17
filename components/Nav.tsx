@@ -15,6 +15,7 @@ export default function Nav() {
 
   return (
     <nav
+      aria-label="Primary"
       className={`site-nav${isHome ? ' site-nav--home' : ''}`}
       style={{
         position: 'fixed',
@@ -38,6 +39,7 @@ export default function Nav() {
             <li key={label}>
               <Link
                 href={href}
+                aria-current={active ? 'page' : undefined}
                 className={[
                   'site-nav-link',
                   active ? 'site-nav-link--active' : '',

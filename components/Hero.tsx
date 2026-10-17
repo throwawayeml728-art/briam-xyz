@@ -164,7 +164,7 @@ export default function Hero() {
   }, [])
 
   return (
-    <main ref={root} className="hero">
+    <main id="main" ref={root} className="hero">
       <Image
         src="/hero/pixelated.jpg"
         alt="Pixel-art rendering of Monument Valley at sunset"
