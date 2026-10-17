@@ -9,7 +9,7 @@ export type Project = {
   year: string                 // e.g. "2025" or "2025–"
   url?: string                 // omit if there is nothing to link to yet
   status?: 'in progress'       // optional; shown as plain text only when meaningful
-  image?: string               // optional screenshot, shown on hover (desktop) / below row (mobile)
+  image?: string               // optional preview, e.g. /projects/my-app.webp (3:2)
 }
 
 export type Photo = {
@@ -41,11 +41,12 @@ export const siteConfig = {
 //     name: 'My App',
 //     desc: 'One sentence about what it does.',
 //     year: '2026',                        // or '2025–' for ongoing
-//     url: 'https://example.com',          // optional; row becomes a link
+//     url: 'https://example.com',          // optional; whole card becomes a link
 //     status: 'in progress',               // optional; plain text, only if meaningful
-//     image: '/projects/my-app.webp',      // optional screenshot (3:2 works best) in /public/projects
+//     image: '/projects/my-app.webp',      // optional preview, shown 3:2 (cropped from top); 1440x900 WebP in /public/projects
 //   },
-// Entries without an image render as a clean typographic row.
+// Each project renders as a card: preview, name, year, description. The whole card links to url if set.
+// Entries without an image get a typographic fallback tile (large initial) automatically.
 export const projects: Project[] = [
   {
     name: 'FrameCoach',
@@ -58,6 +59,7 @@ export const projects: Project[] = [
     desc: 'A tradfi-crypto bridge community rooted in the Thirdspace concept.',
     year: '2025',
     url: 'https://luma.com/user/usr-Eh8dQi5q7sejAW6',
+    image: '/projects/nyc-thirdspace-community.webp',
   },
   {
     name: 'World Map Explorer',
