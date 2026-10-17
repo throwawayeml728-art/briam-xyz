@@ -1,5 +1,5 @@
-import HomeGradient from '@/components/HomeGradient'
+import Hero from '@/components/Hero'
 
 export default function Home() {
-  return <HomeGradient />
+  return <Hero />
 }

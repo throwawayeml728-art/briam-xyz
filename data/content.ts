@@ -15,11 +15,13 @@ export type Clipping = {
 }
 
 export type Project = {
-  year: string
   name: string
   desc: string
-  url?: string
+  year: string                 // e.g. "2025" or "2025–"
+  url?: string                 // omit if there is nothing to link to yet
   status?: 'live' | 'in progress' | 'archived'
+  tags?: string[]              // e.g. ['AI', 'iOS']
+  image?: string               // optional screenshot: /public path or Cloudinary URL
 }
 
 export type Photo = {
@@ -79,25 +81,39 @@ export function getClippingIndex(slug: string): number {
 }
 
 // ─── PROJECTS ────────────────────────────────────────────────────────
+// AI-built apps. To add one, copy an entry below and paste it at the TOP of
+// the list (newest first). Only name, desc and year are required:
+//   {
+//     name: 'My App',
+//     desc: 'One sentence about what it does.',
+//     year: '2026',
+//     url: 'https://example.com',          // optional
+//     status: 'live',                      // optional: 'live' | 'in progress' | 'archived'
+//     tags: ['AI', 'Next.js'],             // optional
+//     image: '/projects/my-app.png',       // optional screenshot in /public/projects
+//   },
 export const projects: Project[] = [
   {
-    year: '2025–',
     name: 'FrameCoach',
     desc: 'AI-powered iPhone app for real-time photography composition coaching.',
+    year: '2025–',
     status: 'in progress',
+    tags: ['AI', 'iOS', 'Photography'],
   },
   {
-    year: '2025',
     name: 'NYC Thirdspace Community',
     desc: 'A tradfi-crypto bridge community rooted in the Thirdspace concept.',
+    year: '2025',
     url: 'https://luma.com/user/usr-Eh8dQi5q7sejAW6',
     status: 'live',
+    tags: ['Community'],
   },
   {
-    year: '2025',
     name: 'World Map Explorer',
     desc: 'Interactive world map with country exploration and quiz features. Built with Next.js.',
+    year: '2025',
     status: 'live',
+    tags: ['Next.js', 'Maps'],
   },
 ]
 
