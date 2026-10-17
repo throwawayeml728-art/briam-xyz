@@ -87,6 +87,7 @@ export const projects: Project[] = [
     desc: 'An interactive map of biblical characters, studies and books across time periods.',
     year: '2026',
     url: 'https://biblical-map.vercel.app',
+    image: '/projects/biblical-map.webp',
   },
 ]
 
