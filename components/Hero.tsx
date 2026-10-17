@@ -1,158 +1,180 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
-// Which stylised image covers the photo. Switch here: 'pixelated' | 'painted'
-const HERO_STYLE: 'pixelated' | 'painted' = 'pixelated'
-const HERO_IMAGES = {
-  pixelated: { src: '/hero/pixelated.jpg', alt: 'Pixel-art rendering of Monument Valley at sunset' },
-  painted: { src: '/hero/painted.jpg', alt: 'Oil painting of Monument Valley at sunset' },
-} as const
+// Pixelation grid of public/hero/pixelated.jpg (2048x1535 source).
+const COLS = 54
+const ROWS = 40
+const IMG_W = 2048
+const IMG_H = 1535
+const FOCAL_Y = 0.6 // matches .hero-img object-position: center 60%
 
-const REVEAL_MS = 3800 // painting -> photo
-const REPAINT_MS = 3200 // photo -> painting
-
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+const FPS = 10 // deliberate stepped frame rate (icme-style "technology" feel)
+const STEP_MS = 1000 / FPS
+const RADIUS_CELLS = 5.2 // reveal radius around the pointer, in grid cells
+const FLIP_P = 0.55 // chance a pending cell advances on a given step -> scattered cell-by-cell
+const LEVELS = [0, 0.5, 1] // cell opacity steps (flicker in, flicker out)
 
 /**
- * Full-viewport hero. The oil painting is shown by default; the original photo
- * sits on top, masked by a soft radial gradient that follows the cursor and
- * slowly grows while hovering until it covers everything (and shrinks back on
- * leave). The painted layer also softly desaturates/unblurs via the mask growth.
- * Touch: tap toggles the reveal from the tap point.
+ * Hero image only. The pixelated image is the default; the original photo is
+ * revealed in a blocky region around the pointer. A canvas draws the original
+ * photo through grid cells that line up exactly with the pixelation blocks.
+ * Cells switch on/off in random order at ~10 fps, stepping through partial
+ * opacity, and revert to pixelated after the pointer leaves.
  */
 export default function Hero() {
   const root = useRef<HTMLElement>(null)
-  const photo = useRef<HTMLDivElement>(null)
-  const state = useRef({
-    p: 0, // eased progress 0..1 (raw linear below)
-    raw: 0,
-    target: 0,
-    x: 0.5, y: 0.5, // smoothed pointer (0..1)
-    tx: 0.5, ty: 0.5,
-    last: 0,
-    raf: 0,
-    reduced: false,
-  })
-
-  const render = useCallback(() => {
-    const el = root.current
-    const ph = photo.current
-    if (!el || !ph) return
-    const s = state.current
-    const { width, height } = el.getBoundingClientRect()
-    const maxR = Math.hypot(width, height) * 1.25
-    const e = easeInOut(s.raw)
-    const r = e * maxR
-    const soft = Math.max(r * 0.55, 1)
-    const px = s.x * width
-    const py = s.y * height
-    const mask = `radial-gradient(circle at ${px}px ${py}px, #000 ${Math.max(r - soft, 0)}px, transparent ${r}px)`
-    ph.style.webkitMaskImage = mask
-    ph.style.maskImage = mask
-    ph.style.opacity = e <= 0.001 ? '0' : '1'
-  }, [])
-
-  const tick = useCallback((now: number) => {
-    const s = state.current
-    const dt = Math.min(now - (s.last || now), 64)
-    s.last = now
-    const dir = s.target > s.raw ? 1 : -1
-    const dur = dir > 0 ? REVEAL_MS : REPAINT_MS
-    if (s.reduced) s.raw = s.target
-    else s.raw = Math.min(1, Math.max(0, s.raw + (dir * dt) / dur))
-    if ((dir > 0 && s.raw >= s.target) || (dir < 0 && s.raw <= s.target)) s.raw = s.target
-    // pointer follows with lag
-    const k = s.reduced ? 1 : 1 - Math.exp(-dt / 220)
-    s.x += (s.tx - s.x) * k
-    s.y += (s.ty - s.y) * k
-    render()
-    const moving = s.raw !== s.target || Math.abs(s.tx - s.x) > 0.0005 || Math.abs(s.ty - s.y) > 0.0005
-    s.raf = moving || s.raw > 0 && s.raw < 1 ? requestAnimationFrame(tick) : 0
-    if (!s.raf) s.last = 0
-  }, [render])
-
-  const kick = useCallback(() => {
-    const s = state.current
-    if (!s.raf) s.raf = requestAnimationFrame(tick)
-  }, [tick])
+  const canvas = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    const el = root.current!
+    const cv = canvas.current!
+    const ctx = cv.getContext('2d')
+    if (!ctx) return
+
+    const level = new Uint8Array(COLS * ROWS) // index into LEVELS
+    const want = new Uint8Array(COLS * ROWS) // 0 or 2
+    let px = -1, py = -1 // pointer, css px; -1 = none
+    let active = false
+    let W = 0, H = 0, dpr = 1
+    let raf = 0, last = 0
+    let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const upd = () => { state.current.reduced = mq.matches }
-    upd()
-    mq.addEventListener('change', upd)
-    render()
-    const s = state.current
-    return () => {
-      mq.removeEventListener('change', upd)
-      cancelAnimationFrame(s.raf)
+    const onMq = () => { reduced = mq.matches; kick() }
+
+    const photo = new window.Image()
+    let loaded = false
+    photo.onload = () => { loaded = true; draw() }
+    photo.src = '/hero/original.jpg'
+
+    // image-space -> screen mapping (object-fit: cover, position center 60%)
+    const geom = () => {
+      const s = Math.max(W / IMG_W, H / IMG_H)
+      const dw = IMG_W * s, dh = IMG_H * s
+      return { s, dx: (W - dw) / 2, dy: (H - dh) * FOCAL_Y }
     }
-  }, [render])
 
-  const setPoint = (e: React.PointerEvent, snap: boolean) => {
-    const rect = root.current!.getBoundingClientRect()
-    const s = state.current
-    s.tx = (e.clientX - rect.left) / rect.width
-    s.ty = (e.clientY - rect.top) / rect.height
-    if (snap) { s.x = s.tx; s.y = s.ty }
-  }
+    const resize = () => {
+      const r = el.getBoundingClientRect()
+      W = r.width; H = r.height
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      cv.width = Math.round(W * dpr)
+      cv.height = Math.round(H * dpr)
+      draw()
+    }
 
-  const onEnter = (e: React.PointerEvent) => {
-    if (e.pointerType === 'touch') return
-    // start the reveal bloom from the cursor when fully painted
-    setPoint(e, state.current.raw < 0.02)
-    state.current.target = 1
-    kick()
-  }
-  const onMove = (e: React.PointerEvent) => {
-    if (e.pointerType === 'touch') return
-    setPoint(e, false)
-    kick()
-  }
-  const onLeave = (e: React.PointerEvent) => {
-    if (e.pointerType === 'touch') return
-    state.current.target = 0
-    kick()
-  }
-  const onDown = (e: React.PointerEvent) => {
-    if (e.pointerType !== 'touch') return
-    const s = state.current
-    setPoint(e, s.raw < 0.02)
-    s.target = s.target === 1 ? 0 : 1 // tap toggles
-    kick()
-  }
+    const computeWant = () => {
+      want.fill(0)
+      if (!active) return
+      const { s, dx, dy } = geom()
+      const cw = (IMG_W / COLS) * s, ch = (IMG_H / ROWS) * s
+      const ccx = (px - dx) / cw, ccy = (py - dy) / ch // pointer in cell units
+      // cells are ~square; use cell-unit distance with aspect correction
+      const ar = ch / cw
+      for (let j = 0; j < ROWS; j++) {
+        for (let i = 0; i < COLS; i++) {
+          const ddx = i + 0.5 - ccx
+          const ddy = (j + 0.5 - ccy) * ar
+          if (ddx * ddx + ddy * ddy <= RADIUS_CELLS * RADIUS_CELLS) want[j * COLS + i] = 2
+        }
+      }
+    }
+
+    const draw = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, W, H)
+      if (!loaded) return
+      const { s, dx, dy } = geom()
+      const cw = (IMG_W / COLS) * s, ch = (IMG_H / ROWS) * s
+      for (let lv = 1; lv < LEVELS.length; lv++) {
+        ctx.save()
+        ctx.beginPath()
+        let any = false
+        for (let j = 0; j < ROWS; j++) {
+          for (let i = 0; i < COLS; i++) {
+            if (level[j * COLS + i] !== lv) continue
+            any = true
+            const x0 = Math.floor(dx + i * cw), y0 = Math.floor(dy + j * ch)
+            const x1 = Math.ceil(dx + (i + 1) * cw), y1 = Math.ceil(dy + (j + 1) * ch)
+            ctx.rect(x0, y0, x1 - x0, y1 - y0)
+          }
+        }
+        if (any) {
+          ctx.clip()
+          ctx.globalAlpha = LEVELS[lv]
+          ctx.drawImage(photo, dx, dy, IMG_W * s, IMG_H * s)
+        }
+        ctx.restore()
+      }
+    }
+
+    const step = (now: number) => {
+      raf = 0
+      if (now - last >= STEP_MS - 4) {
+        last = now
+        computeWant()
+        let pending = false
+        for (let k = 0; k < level.length; k++) {
+          if (level[k] === want[k]) continue
+          if (reduced) level[k] = want[k]
+          else if (Math.random() < FLIP_P) level[k] += level[k] < want[k] ? 1 : -1
+          if (level[k] !== want[k]) pending = true
+        }
+        draw()
+        if (!pending && !active) return // fully reverted: stop loop
+      }
+      raf = requestAnimationFrame(step)
+    }
+
+    function kick() {
+      if (!raf) raf = requestAnimationFrame(step)
+    }
+
+    const set = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      px = e.clientX - r.left
+      py = e.clientY - r.top
+      active = true
+      kick()
+    }
+    const leave = () => { active = false; kick() }
+
+    el.addEventListener('pointerenter', set)
+    el.addEventListener('pointermove', set)
+    el.addEventListener('pointerdown', set)
+    el.addEventListener('pointerleave', leave)
+    el.addEventListener('pointercancel', leave)
+    el.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') leave() })
+    mq.addEventListener('change', onMq)
+    const ro = new ResizeObserver(resize)
+    ro.observe(el)
+    resize()
+
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+      mq.removeEventListener('change', onMq)
+      el.removeEventListener('pointerenter', set)
+      el.removeEventListener('pointermove', set)
+      el.removeEventListener('pointerdown', set)
+      el.removeEventListener('pointerleave', leave)
+      el.removeEventListener('pointercancel', leave)
+    }
+  }, [])
 
   return (
-    <main
-      ref={root}
-      className="hero"
-      onPointerEnter={onEnter}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-      onPointerDown={onDown}
-    >
+    <main ref={root} className="hero">
       <Image
-        src={HERO_IMAGES[HERO_STYLE].src}
-        alt={HERO_IMAGES[HERO_STYLE].alt}
+        src="/hero/pixelated.jpg"
+        alt="Pixel-art rendering of Monument Valley at sunset"
         fill
         priority
         sizes="100vw"
         quality={80}
         className="hero-img"
       />
-      <div ref={photo} className="hero-photo" aria-hidden="true">
-        <Image
-          src="/hero/original.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          quality={80}
-          className="hero-img"
-        />
-      </div>
+      <canvas ref={canvas} className="hero-canvas" aria-hidden="true" />
     </main>
   )
 }

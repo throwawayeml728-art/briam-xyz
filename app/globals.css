@@ -609,7 +609,7 @@ body {
   height: 100dvh;
   overflow: hidden;
   background: #2a1510;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 .hero-img {
@@ -619,12 +619,12 @@ body {
   -webkit-user-drag: none;
 }
 
-.hero-photo {
+.hero-canvas {
   position: absolute;
   inset: 0;
-  opacity: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  will-change: mask-image, -webkit-mask-image;
 }
 
 /* ─── Projects list ─────────────────────────────────────────────────── */
