@@ -49,26 +49,6 @@ export const siteConfig = {
 // Entries without an image get a typographic fallback tile (large initial) automatically.
 export const projects: Project[] = [
   {
-    name: 'FrameCoach',
-    desc: 'AI-powered iPhone app for real-time photography composition coaching.',
-    year: '2025–',
-    status: 'in progress',
-  },
-  {
-    name: 'NYC Thirdspace Community',
-    desc: 'A tradfi-crypto bridge community rooted in the Thirdspace concept.',
-    year: '2025',
-    url: 'https://luma.com/user/usr-Eh8dQi5q7sejAW6',
-    image: '/projects/nyc-thirdspace-community.webp',
-  },
-  {
-    name: 'World Map Explorer',
-    desc: 'Interactive world map with country exploration and quiz features. Built with Next.js.',
-    year: '2025',
-    url: 'https://v0-world-map-app-theta.vercel.app',
-    image: '/projects/world-map-explorer.webp',
-  },
-  {
     name: 'Dog Thanksgiving NYC',
     desc: 'A five-course, dog-safe Thanksgiving tasting menu in New York City.',
     year: '2026',
