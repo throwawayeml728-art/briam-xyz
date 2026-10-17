@@ -74,14 +74,14 @@ export default function Projects({ viewAllHref }: { viewAllHref?: string } = {})
         style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e8e8e4' }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px' }}>
-          <h2 style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888884', margin: 0 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: 400, letterSpacing: '-0.01em', textTransform: 'none', color: '#888884', margin: 0 }}>
             Projects
           </h2>
           {viewAllHref && (
             <Link href={viewAllHref} className="home-link">View all <span aria-hidden="true">→</span></Link>
           )}
         </div>
-        <p style={{ fontSize: '14px', fontWeight: 300, color: '#888884', margin: '10px 0 0' }}>
+        <p style={{ fontSize: '14px', fontWeight: 400, color: '#888884', margin: '10px 0 0' }}>
           Apps I&rsquo;ve built with AI.
         </p>
       </motion.div>
