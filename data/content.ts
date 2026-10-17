@@ -65,6 +65,28 @@ export const projects: Project[] = [
     name: 'World Map Explorer',
     desc: 'Interactive world map with country exploration and quiz features. Built with Next.js.',
     year: '2025',
+    url: 'https://v0-world-map-app-theta.vercel.app',
+    image: '/projects/world-map-explorer.webp',
+  },
+  {
+    name: 'Dog Thanksgiving NYC',
+    desc: 'A five-course, dog-safe Thanksgiving tasting menu in New York City.',
+    year: '2026',
+    url: 'https://dogsgivin3g.vercel.app',
+    image: '/projects/dogsgivin3g.webp',
+  },
+  {
+    name: 'Meridian',
+    desc: 'A map quiz for learning where every country is.',
+    year: '2026',
+    url: 'https://mapquiz-meridian.vercel.app',
+    image: '/projects/meridian.webp',
+  },
+  {
+    name: 'Biblical Map',
+    desc: 'An interactive map of biblical characters, studies and books across time periods.',
+    year: '2026',
+    url: 'https://biblical-map.vercel.app',
   },
 ]
 
