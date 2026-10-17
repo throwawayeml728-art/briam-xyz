@@ -8,8 +8,8 @@ import argparse, sys
 import cv2, numpy as np
 ap = argparse.ArgumentParser()
 ap.add_argument('--mode', choices=['painted', 'pixelated', 'all'], default='all')
-ap.add_argument('--block', type=int, default=28)
-ap.add_argument('--colors', type=int, default=40)
+ap.add_argument('--block', type=int, default=38)
+ap.add_argument('--colors', type=int, default=28)
 args = ap.parse_args()
 src = cv2.imread('public/hero/source.jpg')
 W = 2048
@@ -25,18 +25,37 @@ def make_pixelated(orig, block, ncolors):
     small = cv2.resize(orig, (sw, sh), interpolation=cv2.INTER_AREA).astype(np.float32)
     # slight saturation boost to keep the sunset glow
     hsv = cv2.cvtColor(small.astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
-    hsv[..., 1] = np.clip(hsv[..., 1] * 1.12, 0, 255)
+    hsv[..., 1] = np.clip(hsv[..., 1] * 1.2, 0, 255)
     small = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
     # light 4x4 Bayer ordered dither before quantization
     bayer = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], np.float32) / 16 - 0.5
     tile = np.tile(bayer, (sh // 4 + 1, sw // 4 + 1))[:sh, :sw]
-    small = np.clip(small + tile[..., None] * 14, 0, 255)
+    # contrast boost around mid-grey
+    small = np.clip((small - 118) * 1.1 + 118, 0, 255)
+    small = np.clip(small + tile[..., None] * 8, 0, 255)
     # k-means palette
     cv2.setRNGSeed(3)
     data = small.reshape(-1, 3)
     _, lab, cen = cv2.kmeans(data, ncolors, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5), 3, cv2.KMEANS_PP_CENTERS)
     q = cen[lab.flatten()].reshape(sh, sw, 3).astype(np.uint8)
-    out = cv2.resize(q, (W, H), interpolation=cv2.INTER_NEAREST)
+    # crisp blocks (nearest) with per-cell bevel shading + thin dark grid gaps
+    ys = np.minimum((np.arange(H) * sh // H), sh - 1); xs = np.minimum((np.arange(W) * sw // W), sw - 1)
+    out = q[ys][:, xs].astype(np.float32)
+    cw, ch = W / sw, H / sh
+    fx = ((np.arange(W) + 0.5) * sw / W) % 1.0   # 0..1 inside cell
+    fy = ((np.arange(H) + 0.5) * sh / H) % 1.0
+    px = np.arange(W) - np.floor(np.arange(W) * sw / W) * cw   # px offset within cell
+    py = np.arange(H) - np.floor(np.arange(H) * sh / H) * ch
+    bev = 4.0
+    # bevel: light top/left edge, dark bottom/right edge
+    top = np.clip(1 - py / bev, 0, 1)[:, None]; left = np.clip(1 - px / bev, 0, 1)[None, :]
+    bot = np.clip(1 - (ch - 1 - py) / bev, 0, 1)[:, None]; right = np.clip(1 - (cw - 1 - px) / bev, 0, 1)[None, :]
+    shade = 38 * np.maximum(top, left) - 46 * np.maximum(bot, right)
+    out = out + shade[..., None]
+    # thin dark gap lines (2px) along cell boundaries
+    gap = ((py < 1.5)[:, None] | (px < 1.5)[None, :])
+    out[gap] = out[gap] * 0.28
+    out = np.clip(out, 0, 255).astype(np.uint8)
     cv2.imwrite('public/hero/pixelated.jpg', out, [cv2.IMWRITE_JPEG_QUALITY, 92])
     print('pixelated', sw, sh, ncolors)
 

@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useCallback, useEffect, useRef } from 'react'
-import { siteConfig } from '@/data/content'
 
 // Which stylised image covers the photo. Switch here: 'pixelated' | 'painted'
 const HERO_STYLE: 'pixelated' | 'painted' = 'pixelated'
@@ -153,12 +152,6 @@ export default function Hero() {
           quality={80}
           className="hero-img"
         />
-      </div>
-      <div className="hero-shade" aria-hidden="true" />
-
-      <div className="hero-content">
-        <h1 className="hero-name">{siteConfig.name}</h1>
-        <p className="hero-tagline">{siteConfig.tagline}</p>
       </div>
     </main>
   )
