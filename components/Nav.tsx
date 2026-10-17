@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation'
 
 const links = [
   ['Home', '/'],
-  ['Photos', '/photos'],
-  ['Projects', '/projects'],
-] as const
+  ['Photos', '/photos', '/#photography'],
+  ['Projects', '/projects', '/#projects'],
+] as readonly (readonly [string, string, string?])[]
 
 export default function Nav() {
   const pathname = usePathname()
@@ -31,14 +31,14 @@ export default function Nav() {
       }}
     >
       <ul className="site-nav-links" style={{ display: 'flex', gap: '32px', listStyle: 'none', margin: 0, padding: 0 }}>
-        {links.filter(([, href]) => !isHome || href !== '/').map(([label, href]) => {
+        {links.filter(([, href]) => !isHome || href !== '/').map(([label, href, homeHref]) => {
           const active = href === '/'
             ? pathname === '/'
             : pathname === href || pathname.startsWith(`${href}/`)
           return (
             <li key={label}>
               <Link
-                href={href}
+                href={isHome && homeHref ? homeHref : href}
                 aria-current={active ? 'page' : undefined}
                 className={[
                   'site-nav-link',

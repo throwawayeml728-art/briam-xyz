@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { projects, type Project } from '@/data/content'
 
@@ -58,7 +59,7 @@ function ProjectRow({ project, i }: { project: Project; i: number }) {
   )
 }
 
-export default function Projects() {
+export default function Projects({ viewAllHref }: { viewAllHref?: string } = {}) {
   return (
     <section
       id="projects"
@@ -72,9 +73,14 @@ export default function Projects() {
         transition={{ duration: 0.5 }}
         style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e8e8e4' }}
       >
-        <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888884', margin: 0 }}>
-          Projects
-        </p>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px' }}>
+          <h2 style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#888884', margin: 0 }}>
+            Projects
+          </h2>
+          {viewAllHref && (
+            <Link href={viewAllHref} className="home-link">View all <span aria-hidden="true">→</span></Link>
+          )}
+        </div>
         <p style={{ fontSize: '14px', fontWeight: 300, color: '#888884', margin: '10px 0 0' }}>
           Apps I&rsquo;ve built with AI.
         </p>
