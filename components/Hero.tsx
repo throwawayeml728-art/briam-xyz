@@ -4,6 +4,13 @@ import Image from 'next/image'
 import { useCallback, useEffect, useRef } from 'react'
 import { siteConfig } from '@/data/content'
 
+// Which stylised image covers the photo. Switch here: 'pixelated' | 'painted'
+const HERO_STYLE: 'pixelated' | 'painted' = 'pixelated'
+const HERO_IMAGES = {
+  pixelated: { src: '/hero/pixelated.jpg', alt: 'Pixel-art rendering of Monument Valley at sunset' },
+  painted: { src: '/hero/painted.jpg', alt: 'Oil painting of Monument Valley at sunset' },
+} as const
+
 const REVEAL_MS = 3800 // painting -> photo
 const REPAINT_MS = 3200 // photo -> painting
 
@@ -128,8 +135,8 @@ export default function Hero() {
       onPointerDown={onDown}
     >
       <Image
-        src="/hero/painted.jpg"
-        alt="Oil painting of Monument Valley at sunset"
+        src={HERO_IMAGES[HERO_STYLE].src}
+        alt={HERO_IMAGES[HERO_STYLE].alt}
         fill
         priority
         sizes="100vw"

@@ -1,6 +1,16 @@
 """Generate public/hero/original.jpg (upscaled+sharpened) and painted.jpg (impressionist impasto painting).
-Usage: python scripts/make-hero.py   (needs opencv-contrib-python-headless, numpy)"""
+Also generates pixelated.jpg (chunky pixel-art, palette-quantized, ordered dither).
+Usage: python scripts/make-hero.py [--mode painted|pixelated|all] [--block 28] [--colors 40]
+  painted    -> original.jpg + painted.jpg (slow)
+  pixelated  -> original.jpg + pixelated.jpg (fast)   [default: all]
+(needs opencv-contrib-python-headless, numpy)"""
+import argparse, sys
 import cv2, numpy as np
+ap = argparse.ArgumentParser()
+ap.add_argument('--mode', choices=['painted', 'pixelated', 'all'], default='all')
+ap.add_argument('--block', type=int, default=28)
+ap.add_argument('--colors', type=int, default=40)
+args = ap.parse_args()
 src = cv2.imread('public/hero/source.jpg')
 W = 2048
 h = round(src.shape[0] * W / src.shape[1])
@@ -8,6 +18,32 @@ up = cv2.resize(src, (W, h), interpolation=cv2.INTER_LANCZOS4)
 blur = cv2.GaussianBlur(up, (0, 0), 1.6)
 orig = cv2.addWeighted(up, 1.5, blur, -0.5, 0)
 cv2.imwrite('public/hero/original.jpg', orig, [cv2.IMWRITE_JPEG_QUALITY, 88])
+
+def make_pixelated(orig, block, ncolors):
+    H, W = orig.shape[:2]
+    sw, sh = round(W / block), round(H / block)
+    small = cv2.resize(orig, (sw, sh), interpolation=cv2.INTER_AREA).astype(np.float32)
+    # slight saturation boost to keep the sunset glow
+    hsv = cv2.cvtColor(small.astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
+    hsv[..., 1] = np.clip(hsv[..., 1] * 1.12, 0, 255)
+    small = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+    # light 4x4 Bayer ordered dither before quantization
+    bayer = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]], np.float32) / 16 - 0.5
+    tile = np.tile(bayer, (sh // 4 + 1, sw // 4 + 1))[:sh, :sw]
+    small = np.clip(small + tile[..., None] * 14, 0, 255)
+    # k-means palette
+    cv2.setRNGSeed(3)
+    data = small.reshape(-1, 3)
+    _, lab, cen = cv2.kmeans(data, ncolors, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5), 3, cv2.KMEANS_PP_CENTERS)
+    q = cen[lab.flatten()].reshape(sh, sw, 3).astype(np.uint8)
+    out = cv2.resize(q, (W, H), interpolation=cv2.INTER_NEAREST)
+    cv2.imwrite('public/hero/pixelated.jpg', out, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    print('pixelated', sw, sh, ncolors)
+
+if args.mode in ('pixelated', 'all'):
+    make_pixelated(orig, args.block, args.colors)
+if args.mode == 'pixelated':
+    sys.exit(0)
 
 # --- Impressionist impasto painting: layered coarse-to-fine strokes + height-map relief lighting ---
 rng = np.random.default_rng(11)
