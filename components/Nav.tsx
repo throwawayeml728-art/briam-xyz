@@ -16,7 +16,7 @@ export default function Nav() {
   return (
     <nav
       aria-label="Primary"
-      className={`site-nav${isHome ? ' site-nav--home' : ''}`}
+      className={`site-nav${isHome ? ' site-nav--home' : ' site-nav--page'}`}
       style={{
         position: 'fixed',
         top: 0, left: 0, right: 0,
@@ -24,10 +24,6 @@ export default function Nav() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        height: '60px',
-        background: isHome ? undefined : 'rgba(250,250,248,0.92)',
-        backdropFilter: isHome ? undefined : 'blur(12px)',
-        borderBottom: isHome ? undefined : '1px solid #e8e8e4',
       }}
     >
       <ul className="site-nav-links" style={{ display: 'flex', gap: '32px', listStyle: 'none', margin: 0, padding: 0 }}>

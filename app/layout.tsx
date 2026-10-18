@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Libre_Baskerville } from 'next/font/google'
 import { MotionConfig } from 'framer-motion'
@@ -8,6 +8,13 @@ import { PhotoZoomProvider } from '@/components/PhotoZoomProvider'
 const serif = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], style: ['normal', 'italic'], display: 'swap', variable: '--font-serif' })
 
 const description = 'Builder, photographer, curious person. Based in New York City.'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#fafaf8',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://fifthdegree.xyz'),

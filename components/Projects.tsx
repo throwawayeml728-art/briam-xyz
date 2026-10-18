@@ -14,6 +14,7 @@ function ProjectCard({ project, i }: { project: Project; i: number }) {
             alt={`Preview of ${project.name}`}
             fill
             sizes="(max-width: 639px) 100vw, (max-width: 999px) 50vw, 350px"
+            quality={75}
             style={{ objectFit: 'cover', objectPosition: 'top' }}
           />
         ) : (

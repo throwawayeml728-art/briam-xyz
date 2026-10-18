@@ -89,6 +89,34 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
     }
   }, [activeIndex, close, goPrev, goNext])
 
+  // Swipe left/right in the lightbox (single finger only, and not while pinch-zoomed, so
+  // native pinch-zoom and panning keep working).
+  const swipe = useRef<{ x: number; y: number; id: number } | null>(null)
+  const activePointers = useRef(new Set<number>())
+  const onLbDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'touch') return
+    activePointers.current.add(e.pointerId)
+    swipe.current = activePointers.current.size === 1 ? { x: e.clientX, y: e.clientY, id: e.pointerId } : null
+  }
+  const onLbUp = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'touch') return
+    activePointers.current.delete(e.pointerId)
+    const s = swipe.current
+    swipe.current = null
+    if (!s || s.id !== e.pointerId) return
+    if ((window.visualViewport?.scale ?? 1) > 1.02) return
+    const dx = e.clientX - s.x, dy = e.clientY - s.y
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      ignoreCloseRef.current = true
+      window.setTimeout(() => { ignoreCloseRef.current = false }, 120)
+      if (dx < 0) goNext(); else goPrev()
+    }
+  }
+  const onLbCancel = (e: React.PointerEvent) => {
+    activePointers.current.delete(e.pointerId)
+    swipe.current = null
+  }
+
   const handleBackdropClick = () => {
     if (ignoreCloseRef.current) return
     close()
@@ -150,6 +178,7 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
                 <PhotoTile
                   key={photo.src}
                   photo={photo}
+                  sizes={tileSizes(grid.columns)}
                   onOpen={() => openPhoto(index)}
                 />
               ))}
@@ -165,6 +194,9 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
           aria-modal="true"
           aria-label={active.alt}
           onClick={handleBackdropClick}
+          onPointerDown={onLbDown}
+          onPointerUp={onLbUp}
+          onPointerCancel={onLbCancel}
         >
           <button
             type="button"
@@ -206,8 +238,8 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
               alt={active.alt}
               width={lightboxSize(active.ratio).w}
               height={lightboxSize(active.ratio).h}
-              sizes="95vw"
-              quality={85}
+              sizes="(max-width: 768px) 100vw, 95vw"
+              quality={80}
               priority
               className="photo-lightbox-image"
             />
@@ -228,7 +260,12 @@ function lightboxSize(ratio?: string) {
   return r >= 1 ? { w: 2000, h: Math.round(2000 / r) } : { w: Math.round(1600 * r), h: 1600 }
 }
 
-function PhotoTile({ photo, onOpen }: { photo: Photo; onOpen: () => void }) {
+// Each tile is ~1/columns of the viewport wide; tell next/image so phones don't download desktop widths.
+function tileSizes(columns: number) {
+  return `(max-width: 768px) ${Math.round(100 / columns)}vw, ${Math.round(100 / Math.min(columns, 4))}vw`
+}
+
+function PhotoTile({ photo, onOpen, sizes }: { photo: Photo; onOpen: () => void; sizes: string }) {
   return (
     <div
       role="button"
@@ -249,7 +286,8 @@ function PhotoTile({ photo, onOpen }: { photo: Photo; onOpen: () => void }) {
             src={photo.src}
             alt={photo.alt}
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes={sizes}
+            quality={72}
             className="photo-tile-image"
             draggable={false}
           />
