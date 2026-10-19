@@ -7,7 +7,7 @@ import { getPhotos } from '@/lib/photos'
 
 export const dynamic = 'force-dynamic'
 
-const HOME_PHOTO_COUNT = 15 // curated subset: first N photos of data/photos.json
+const HOME_PHOTO_COUNT = 43 // show every photo
 
 export default function Home() {
   const photos = getPhotos().slice(0, HOME_PHOTO_COUNT)
