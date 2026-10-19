@@ -71,5 +71,52 @@ export const projects: Project[] = [
   },
 ]
 
+// ─── WORK HISTORY ────────────────────────────────────────────────────
+// Shown on /about, newest first. To add a role, copy an entry and paste it at the TOP.
+// Only role, company and start are required:
+//   {
+//     role: 'Strategic Partnerships',
+//     company: 'Alchemy',
+//     start: '2025',            // year (or 'Oct 2025')
+//     end: '2027',              // omit if this is your current role -> shown as "Present"
+//     desc: 'One line.',        // optional
+//     url: 'https://…',         // optional; links the company name
+//   },
+// Verified against Brian's public LinkedIn profile (linkedin.com/in/brian-landauer), Oct 2026.
+// TODO: add any earlier roles (the public profile did not list any before 2021).
+export type WorkEntry = {
+  role: string
+  company: string
+  start: string
+  end?: string
+  desc?: string
+  url?: string
+}
+
+export const workHistory: WorkEntry[] = [
+  {
+    role: 'Strategic Partnerships',
+    company: 'Alchemy',
+    start: '2025',
+    desc: 'Helping institutions build, launch and scale enterprise-grade blockchain applications.',
+    url: 'https://www.alchemy.com',
+  },
+  {
+    role: 'Enterprise Sales',
+    company: 'Amazon Web Services',
+    start: '2022',
+    end: '2025',
+    desc: 'Advised strategic SaaS customers on infrastructure and innovation decisions.',
+    url: 'https://aws.amazon.com',
+  },
+  {
+    role: 'Co-Founder',
+    company: 'Blockchain at Utah',
+    start: '2021',
+    end: '2023',
+    desc: 'Built a community connecting leaders in blockchain and web3.',
+  },
+]
+
 // ─── PHOTOS ──────────────────────────────────────────────────────────
 // Photos live in data/photos.json — manage them at /admin/photos

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { siteConfig } from '@/data/content'
 
 const socialLinks = [
@@ -13,6 +14,7 @@ export default function Footer() {
         © {new Date().getFullYear()} {siteConfig.name} · {siteConfig.domain}
       </p>
       <nav className="site-footer-links" aria-label="Social links">
+        <Link href="/about">About</Link>
         {socialLinks.map(([label, href]) => {
           const external = !href.startsWith('mailto:')
           return (

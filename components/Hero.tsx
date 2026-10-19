@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 // Pixelation grid of public/hero/pixelated.jpg (2048x1535 source).
 const COLS = 54
@@ -25,6 +25,11 @@ const RADIUS_HALF_LIFE = 0.1 // s: reveal radius grows / shrinks smoothly
 const TAP_HOLD_MS = 900 // touch: how long a tap/long-press reveal lingers
 const LONG_PRESS_MS = 220 // touch: press-and-hold before the reveal starts
 const DRAG_PX = 8 // touch: horizontal travel that starts a reveal drag
+const RESOLVE_START = 0.2 // runway progress where the scroll-driven resolve begins
+const RESOLVE_END = 1 // ...and where every cell is the real photo
+const FLIP_SPAN = 0.32 // fraction of the resolve window a single cell's flip occupies
+const WAVE_ROWS = 0.78 // share of the stagger that is top-to-bottom (rest is per-cell random)
+const PROGRESS_HALF_LIFE = 0.09 // s: eased follow of the scroll target
 const MAX_DT = 0.05 // s: clamp so a stalled frame never teleports animations
 
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -49,25 +54,22 @@ type Cell = {
  */
 export default function Hero() {
   const root = useRef<HTMLElement>(null)
+  const stick = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
-  const reducedMotion = useReducedMotion()
-  const [lite, setLite] = useState(true) // small / touch screens: no scroll blur (SSR-safe default)
+  const progressRef = useRef(0) // raw runway progress 0..1 (set from scroll, eased inside the loop)
+  const kickRef = useRef<() => void>(() => {})
 
-  const { scrollYProgress } = useScroll({ target: root, offset: ['start start', 'end start'] })
-  const opacity = useTransform(scrollYProgress, [0, 0.9], [1, 0])
-  const scale = useTransform(scrollYProgress, [0, 1], [1, reducedMotion ? 1 : 1.06])
-  const blur = useTransform(scrollYProgress, [0, 1], ['blur(0px)', reducedMotion || lite ? 'blur(0px)' : 'blur(6px)'])
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px), (pointer: coarse)')
-    const update = () => setLite(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
+  // progress across the sticky runway: 0 = hero pinned at top, 1 = runway fully scrolled
+  const { scrollYProgress } = useScroll({ target: root, offset: ['start start', 'end end'] })
+  const cueOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
 
   useEffect(() => {
-    const el = root.current!
+    progressRef.current = scrollYProgress.get()
+    return scrollYProgress.on('change', (v) => { progressRef.current = v; kickRef.current() })
+  }, [scrollYProgress])
+
+  useEffect(() => {
+    const el = stick.current!
     const cv = canvas.current!
     const ctx2d = cv.getContext('2d', { alpha: true })
     if (!ctx2d) return
@@ -97,6 +99,14 @@ export default function Hero() {
     let holdTimer = 0, pressTimer = 0
     let lastClientX = 0, lastClientY = 0, pendingMove = false
     let ready = 0
+    let P = progressRef.current // eased progress
+    const sf = new Float32Array(N) // per-cell scroll flip progress 0..1
+    const thr = new Float32Array(N) // per-cell stagger threshold 0..1 (top-to-bottom wave + stable random)
+    for (let j = 0; j < ROWS; j++) for (let i = 0; i < COLS; i++) {
+      const k = j * COLS + i
+      const rnd = (((k * 2246822519) >>> 0) % 10007) / 10007
+      thr[k] = (j / (ROWS - 1)) * WAVE_ROWS + rnd * (1 - WAVE_ROWS)
+    }
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     let reduced = mq.matches
     const onMq = () => { reduced = mq.matches; kick() }
@@ -201,23 +211,11 @@ export default function Hero() {
       }
     }
 
-    function draw() {
-      ctx.clearRect(0, 0, cv.width, cv.height)
-      if (!photoCv || !pixelCv || !avgP || !avgO) return
-      // 1) settled original cells: straight 1:1 blits
-      for (let k = 0; k < N; k++) {
-        const c = cells[k]
-        if (c.at === 1 && c.t < 0) ctx.drawImage(photoCv, rx[k], ry[k], rw[k], rh[k], rx[k], ry[k], rw[k], rh[k])
-      }
-      // 2) flipping cells
-      for (let k = 0; k < N; k++) {
-        const c = cells[k]
-        if (c.t < 0 || c.delay > 0) continue
-        const f = Math.min(FLAPS - 1e-6, (c.t / (FLAPS * FLAP_MS)) * FLAPS)
+    // split-flap cell k at flap position f (0..FLAPS), flipping toward `dir`
+    function flip(k: number, dir: 0 | 1, f: number) {
         const idx = Math.floor(f)
         const e = easeInOutCubic(f - idx) // eased fold angle: theta = PI * e
         const cos = Math.cos(Math.PI * e)
-        const dir = c.dir
         // static halves behind the flap: new top, old bottom
         half(true, k, dir, idx + 1, 1, 0)
         half(false, k, dir, idx, 1, 0)
@@ -228,6 +226,32 @@ export default function Hero() {
         ctx.fillRect(rx[k], ym - 1, rw[k], Math.max(1, Math.round(dpr * 0.5)))
         ctx.fillStyle = 'rgba(255,255,255,0.08)'
         ctx.fillRect(rx[k], ym, rw[k], Math.max(1, Math.round(dpr * 0.5)))
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, cv.width, cv.height)
+      if (!photoCv || !pixelCv || !avgP || !avgO) return
+      if (reduced) {
+        // reduced motion: no flipping, just a crossfade from pixelated to photo driven by scroll
+        ctx.drawImage(pixelCv, 0, 0)
+        if (P > 0.001) { ctx.globalAlpha = Math.min(1, P); ctx.drawImage(photoCv, 0, 0); ctx.globalAlpha = 1 }
+      }
+      // 1) settled original cells: straight 1:1 blits
+      for (let k = 0; k < N; k++) {
+        const c = cells[k]
+        if (!reduced && sf[k] >= 1) ctx.drawImage(photoCv, rx[k], ry[k], rw[k], rh[k], rx[k], ry[k], rw[k], rh[k])
+        else if (c.at === 1 && c.t < 0) ctx.drawImage(photoCv, rx[k], ry[k], rw[k], rh[k], rx[k], ry[k], rw[k], rh[k])
+      }
+      // 2) scroll-driven flips (deterministic from progress; hover flips take precedence on their cell)
+      if (!reduced) for (let k = 0; k < N; k++) {
+        const f = sf[k]
+        if (f > 0 && f < 1 && cells[k].t < 0 && cells[k].at === 0) flip(k, 1, Math.min(FLAPS - 1e-6, f * FLAPS))
+      }
+      // 3) hover flips
+      for (let k = 0; k < N; k++) {
+        const c = cells[k]
+        if (c.t < 0 || c.delay > 0) continue
+        flip(k, c.dir, Math.min(FLAPS - 1e-6, (c.t / (FLAPS * FLAP_MS)) * FLAPS))
       }
     }
 
@@ -264,6 +288,15 @@ export default function Hero() {
       radius = reduced ? rTarget : damp(radius, rTarget, RADIUS_HALF_LIFE, dt)
       if (Math.abs(radius - rTarget) < 0.01) radius = rTarget
 
+      // scroll progress: eased follow of the target, then per-cell flip progress
+      const pT = progressRef.current
+      P = reduced ? pT : damp(P, pT, PROGRESS_HALF_LIFE, dt)
+      if (Math.abs(P - pT) < 0.0004) P = pT
+      const rp = Math.min(1, Math.max(0, (P - RESOLVE_START) / (RESOLVE_END - RESOLVE_START)))
+      for (let k = 0; k < N; k++) {
+        const t0 = thr[k] * (1 - FLIP_SPAN)
+        sf[k] = Math.min(1, Math.max(0, (rp - t0) / FLIP_SPAN))
+      }
       const ccx = (cx * dpr - gdx) / gcw, ccy = (cy * dpr - gdy) / gch
       const ar = gch / gcw
       let busy = false
@@ -271,6 +304,7 @@ export default function Hero() {
         for (let i = 0; i < COLS; i++) {
           const k = j * COLS + i
           const c = cells[k]
+          if (!reduced && sf[k] >= 1) { c.at = 0; c.t = -1; c.delay = 0; continue } // fully resolved: hover is moot
           const ddx = i + 0.5 - ccx, ddy = (j + 0.5 - ccy) * ar
           const d = Math.sqrt(ddx * ddx + ddy * ddy)
           // soft edge: per-cell jitter on the radius; hysteresis on the way out
@@ -299,7 +333,8 @@ export default function Hero() {
       }
       draw()
       const settling = Math.abs(cx - tx) > 0.3 || Math.abs(cy - ty) > 0.3
-      if (busy || settling || radius !== rTarget) raf = requestAnimationFrame(step)
+      const scrolling = P !== pT
+      if (busy || settling || scrolling || radius !== rTarget) raf = requestAnimationFrame(step)
       else lastT = 0
     }
 
@@ -370,9 +405,11 @@ export default function Hero() {
     mq.addEventListener('change', onMq)
     const ro = new ResizeObserver(resize)
     ro.observe(el)
+    kickRef.current = () => { if (reduced) P = progressRef.current; kick() }
     resize()
 
     return () => {
+      kickRef.current = () => {}
       cancelAnimationFrame(raf)
       window.clearTimeout(holdTimer)
       window.clearTimeout(pressTimer)
@@ -392,23 +429,26 @@ export default function Hero() {
 
   return (
     <section ref={root} className="hero" aria-label="Hero">
-      <motion.div className="hero-stage" style={lite ? { opacity, scale } : { opacity, scale, filter: blur }}>
-        <Image
-          src="/hero/pixelated.jpg"
-          alt="Pixel-art rendering of Monument Valley at sunset"
-          fill
-          priority
-          sizes="100vw"
-          quality={80}
-          className="hero-img"
-        />
-        <canvas ref={canvas} className="hero-canvas" aria-hidden="true" />
-      </motion.div>
-      <div className="hero-fade" aria-hidden="true" />
-      <div className="hero-cue" aria-hidden="true">
-        <svg width="22" height="12" viewBox="0 0 22 12" fill="none">
-          <path d="M2 2l9 8 9-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      <div ref={stick} className="hero-sticky">
+        <div className="hero-stage">
+          <Image
+            src="/hero/pixelated.jpg"
+            alt="Pixel-art rendering of Monument Valley at sunset"
+            fill
+            priority
+            sizes="100vw"
+            quality={80}
+            className="hero-img"
+          />
+          <canvas ref={canvas} className="hero-canvas" aria-hidden="true" />
+        </div>
+        <motion.div className="hero-cue-wrap" aria-hidden="true" style={{ opacity: cueOpacity }}>
+          <div className="hero-cue">
+            <svg width="22" height="12" viewBox="0 0 22 12" fill="none">
+              <path d="M2 2l9 8 9-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

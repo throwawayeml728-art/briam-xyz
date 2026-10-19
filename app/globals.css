@@ -626,11 +626,18 @@ body {
 /* ─── Home hero ─────────────────────────────────────────────────────── */
 .hero {
   position: relative;
+  /* scroll runway: 100svh pinned + 130svh of scroll-driven resolve */
+  height: 230vh;
+  height: 230svh;
+  background: #2a1510;
+}
+.hero-sticky {
+  position: sticky;
+  top: 0;
   height: 100vh;
   height: 100svh; /* small viewport: stays put when the iOS/Android URL bar collapses */
   min-height: 420px;
   overflow: hidden;
-  background: #fafaf8;
   touch-action: pan-y; /* vertical scroll works; horizontal drags reveal */
 }
 
@@ -638,31 +645,15 @@ body {
   position: absolute;
   inset: 0;
   background: #2a1510;
-  transform-origin: center 40%;
-  will-change: opacity, transform;
   contain: layout paint;
 }
 
-.hero-fade {
-  position: absolute;
-  left: 0; right: 0; bottom: -1px;
-  height: 42%;
-  pointer-events: none;
-  background: linear-gradient(to bottom,
-    rgba(250,250,248,0) 0%,
-    rgba(250,250,248,0.08) 18%,
-    rgba(250,250,248,0.25) 38%,
-    rgba(250,250,248,0.55) 60%,
-    rgba(250,250,248,0.85) 82%,
-    #fafaf8 100%);
-}
-
+.hero-cue-wrap { position: absolute; inset: 0; pointer-events: none; }
 .hero-cue {
   position: absolute;
   left: 50%; bottom: 22px;
   transform: translateX(-50%);
-  color: #1a1a18;
-  opacity: 0.55;
+  color: #fff;
   pointer-events: none;
   animation: hero-cue 2.2s ease-in-out infinite;
 }
@@ -672,7 +663,7 @@ body {
 }
 
 .home-main { background: #fafaf8; overflow-x: clip; }
-.home-content { position: relative; }
+.home-content { position: relative; z-index: 1; background: #fafaf8; } /* hard edge as it scrolls over the pinned hero */
 .home-anchor { scroll-margin-top: 0; }
 #photography, #projects { scroll-margin-top: 60px; }
 .home-heading {
@@ -880,4 +871,31 @@ img { max-width: 100%; }
 @media (hover: none) {
   .project-card--link:hover .project-preview img { transform: none; }
   .project-preview img { transition: none; }
+}
+
+/* ─── About / work history ──────────────────────────────────────────── */
+.about-intro { max-width: 1100px; margin: 0 auto; padding: 100px 48px 0; }
+.about-intro h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400; font-size: clamp(28px, 4.4vw, 36px); line-height: 1.2; letter-spacing: -0.02em; margin: 0;
+}
+.about-intro p { font-size: 15px; line-height: 1.6; color: #6b6b66; margin: 12px 0 0; max-width: 56ch; }
+.work-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid #e8e8e4; }
+.work-row {
+  display: grid; grid-template-columns: 160px 1fr; gap: 24px;
+  padding: 24px 0; border-bottom: 1px solid #e8e8e4;
+}
+.work-years { font-size: 13px; color: #6b6b66; font-variant-numeric: tabular-nums; padding-top: 4px; }
+.work-title { font-family: var(--font-serif), Georgia, serif; font-weight: 400; font-size: 20px; line-height: 1.3; letter-spacing: -0.01em; margin: 0; }
+.work-title a { color: inherit; text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .3s ease; }
+.work-title a:hover, .work-title a:focus-visible { background-size: 100% 1px; }
+.work-company { color: #6b6b66; }
+.work-desc { font-size: 13px; color: #6b6b66; margin: 6px 0 0; line-height: 1.6; max-width: 56ch; }
+.work-empty { font-size: 14px; color: #888884; margin: 0; }
+@media (max-width: 768px) {
+  .about-intro { padding: 40px max(20px, env(safe-area-inset-left, 0px)) 0; }
+  .work-row { grid-template-columns: 1fr; gap: 4px; padding: 20px 0; }
+  .work-years { padding-top: 0; }
+  .work-title { font-size: 18px; }
+  .work-desc { font-size: 14px; }
 }

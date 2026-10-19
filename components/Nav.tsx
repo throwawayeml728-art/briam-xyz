@@ -7,6 +7,7 @@ const links = [
   ['Home', '/'],
   ['Photos', '/photos', '/#photography'],
   ['Projects', '/projects', '/#projects'],
+  ['About', '/about'],
 ] as readonly (readonly [string, string, string?])[]
 
 export default function Nav() {
