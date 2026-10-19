@@ -654,7 +654,7 @@ body {
   height: 100svh; /* small viewport: stays put when the iOS/Android URL bar collapses */
   min-height: 420px;
   overflow: hidden;
-  touch-action: pan-y; /* vertical scroll works; horizontal drags reveal */
+  touch-action: pan-y; /* vertical scroll only */
 }
 
 .hero-stage {

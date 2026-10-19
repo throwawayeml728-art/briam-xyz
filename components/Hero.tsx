@@ -5,26 +5,15 @@ import { useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
 // Pixelation grid of public/hero/pixelated.jpg (2048x1535 source).
-const COLS = 54
-const ROWS = 40
+// (make-hero.py --block 28: round(2048/28) x round(1535/28))
+const COLS = 73
+const ROWS = 55
 const IMG_W = 2048
 const IMG_H = 1535
 const FOCAL_Y = 0.6 // matches .hero-img object-position: center 60%
 
 const MAX_DPR = 2 // backing-store cap
 const FLAPS = 3 // flaps per cell: pixelated -> shade -> shade -> original
-const FLAP_MS = 150 // one flap (fold + unfold); a full cell flip is FLAPS * FLAP_MS
-const RADIUS_CELLS = 5.2 // reveal radius around the (smoothed) pointer, in grid cells
-const EDGE_JITTER = 1.1 // cells: per-cell random soft edge on the radius
-const HYSTERESIS = 1.0 // cells: extra distance before a revealed cell reverts (no edge flicker)
-const WAVE_MS_PER_CELL = 16 // stagger radiating out from the cursor
-const ROW_MS = 2.2 // slight row-wise sweep on top of the radial wave
-const COL_MS = 1.4 // ...and left-to-right
-const CURSOR_HALF_LIFE = 0.07 // s: cursor glide (frame-rate independent exponential smoothing)
-const RADIUS_HALF_LIFE = 0.1 // s: reveal radius grows / shrinks smoothly
-const TAP_HOLD_MS = 900 // touch: how long a tap/long-press reveal lingers
-const LONG_PRESS_MS = 220 // touch: press-and-hold before the reveal starts
-const DRAG_PX = 8 // touch: horizontal travel that starts a reveal drag
 const RESOLVE_START = 0.2 // runway progress where the scroll-driven resolve begins
 const RESOLVE_END = 1 // ...and where every cell is the real photo
 const FLIP_SPAN = 0.32 // fraction of the resolve window a single cell's flip occupies
@@ -35,21 +24,16 @@ const MAX_DT = 0.05 // s: clamp so a stalled frame never teleports animations
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 const damp = (a: number, b: number, halfLife: number, dt: number) => b + (a - b) * Math.pow(0.5, dt / halfLife)
 
-type Cell = {
-  at: 0 | 1 // settled state: 0 pixelated, 1 original
-  dir: 0 | 1 // target of the running flip
-  delay: number // ms until the flip starts (counts down while the loop runs)
-  t: number // ms into the running flip, -1 = idle
-}
-
 /**
- * Hero image. Pixelated image is the default; the original photo is revealed in a
- * blocky region around the pointer. A single canvas draws each grid cell as a
- * split-flap tile: the top half folds down, the bottom half folds into place,
- * stepping through intermediate shades with a dark seam across the middle. Fold
- * angles are eased, and the loop is driven by delta time so motion is identical at
- * 60/120/144 Hz. Both images are pre-composited once per resize onto offscreen
- * canvases at device resolution, so each frame only blits integer-aligned sub-rects.
+ * Hero image. The pixelated image is shown at the top of the page; scrolling through
+ * the runway flips grid cells to the original photo (reversible). A single canvas
+ * draws each grid cell as a split-flap tile: the top half folds down, the bottom
+ * half folds into place, stepping through intermediate shades with a dark seam across
+ * the middle. Fold angles are eased, and the loop is driven by delta time so motion is
+ * identical at 60/120/144 Hz. No pointer interaction.
+ * Both images are pre-composited once per resize onto offscreen
+ * canvases at device resolution, so each frame only blits integer-aligned sub-rects (settled cells are merged into
+ * per-row runs, so the draw-call count stays small despite the dense grid).
  * Nothing in the loop touches React state or layout.
  */
 export default function Hero() {
@@ -76,28 +60,18 @@ export default function Hero() {
     const ctx: CanvasRenderingContext2D = ctx2d
 
     const N = COLS * ROWS
-    const cells: Cell[] = Array.from({ length: N }, () => ({ at: 0, dir: 0, delay: 0, t: -1 }))
-    const noise = new Float32Array(N) // stable per-cell jitter in [-1, 1]
-    for (let k = 0; k < N; k++) noise[k] = ((k * 2654435761) % 1000) / 500 - 1
     // precomputed per-cell device-pixel rects (rebuilt on resize only)
     const rx = new Int32Array(N), ry = new Int32Array(N), rw = new Int32Array(N), rh = new Int32Array(N)
-    const shades: (string | undefined)[] = new Array(N * 2 * (FLAPS - 1))
+    const shades: (string | undefined)[] = new Array(N * (FLAPS - 1))
     let avgP: Uint8ClampedArray | null = null
     let avgO: Uint8ClampedArray | null = null
     let photoCv: HTMLCanvasElement | null = null // offscreen, cover-fitted at device res
     let pixelCv: HTMLCanvasElement | null = null
 
-    let tx = 0, ty = 0 // pointer target, CSS px relative to hero (set from events)
-    let hasPointer = false
-    let cx = 0, cy = 0 // smoothed cursor
-    let radius = 0 // smoothed reveal radius (cells)
-    let active = false
     let W = 0, H = 0, dpr = 1
     let gdx = 0, gdy = 0, gcw = 1, gch = 1 // grid geometry in device px
     let raf = 0, lastT = 0
     let visible = true, tabVisible = !document.hidden
-    let holdTimer = 0, pressTimer = 0
-    let lastClientX = 0, lastClientY = 0, pendingMove = false
     let ready = 0
     let P = progressRef.current // eased progress
     const sf = new Float32Array(N) // per-cell scroll flip progress 0..1
@@ -147,16 +121,15 @@ export default function Hero() {
     }
 
     // flat shade between the two textures for flap state `idx` (1..FLAPS-1); cached, never per frame
-    const shade = (k: number, dir: 0 | 1, idx: number) => {
-      const key = (k * 2 + dir) * (FLAPS - 1) + (idx - 1)
+    const shade = (k: number, idx: number) => {
+      const key = k * (FLAPS - 1) + (idx - 1)
       const hit = shades[key]
       if (hit) return hit
-      const from = dir === 1 ? avgP! : avgO!
-      const to = dir === 1 ? avgO! : avgP!
       const m = idx / FLAPS
       // deterministic brightness jitter so flaps read as mechanical, not a smooth ramp
-      const jit = (((k * 131 + idx * 17 + dir * 53) % 11) - 5) * 3.2
+      const jit = (((k * 131 + idx * 17 + 53) % 11) - 5) * 3.2
       const o = k * 4
+      const from = avgP!, to = avgO!
       const s = `rgb(${(from[o] + (to[o] - from[o]) * m + jit) | 0},${(from[o + 1] + (to[o + 1] - from[o + 1]) * m + jit) | 0},${(from[o + 2] + (to[o + 2] - from[o + 2]) * m + jit) | 0})`
       shades[key] = s
       return s
@@ -189,7 +162,7 @@ export default function Hero() {
     }
 
     // one half (top/bottom) of flap state `idx`, vertically scaled about the hinge
-    const half = (top: boolean, k: number, dir: 0 | 1, idx: number, sy: number, dark: number) => {
+    const half = (top: boolean, k: number, idx: number, sy: number, dark: number) => {
       if (sy <= 0.004) return
       const x = rx[k], y = ry[k], w = rw[k], h = rh[k]
       const hT = h >> 1
@@ -198,11 +171,10 @@ export default function Hero() {
       const dyy = top ? y + hT - dh : y + hT
       const sy0 = top ? y : y + hT
       if (idx === 0 || idx === FLAPS) {
-        // textures: idx 0 = old state, idx FLAPS = new state
-        const toPhoto = idx === 0 ? dir === 0 : dir === 1
-        ctx.drawImage(toPhoto ? photoCv! : pixelCv!, x, sy0, w, sh, x, dyy, w, dh)
+        // textures: idx 0 = pixelated, idx FLAPS = photo
+        ctx.drawImage(idx === 0 ? pixelCv! : photoCv!, x, sy0, w, sh, x, dyy, w, dh)
       } else {
-        ctx.fillStyle = shade(k, dir, idx)
+        ctx.fillStyle = shade(k, idx)
         ctx.fillRect(x, dyy, w, dh)
       }
       if (dark > 0.01) {
@@ -211,22 +183,22 @@ export default function Hero() {
       }
     }
 
-    // split-flap cell k at flap position f (0..FLAPS), flipping toward `dir`
-    function flip(k: number, dir: 0 | 1, f: number) {
-        const idx = Math.floor(f)
-        const e = easeInOutCubic(f - idx) // eased fold angle: theta = PI * e
-        const cos = Math.cos(Math.PI * e)
-        // static halves behind the flap: new top, old bottom
-        half(true, k, dir, idx + 1, 1, 0)
-        half(false, k, dir, idx, 1, 0)
-        if (e < 0.5) half(true, k, dir, idx, cos, 0.3 * Math.sin(Math.PI * e)) // old top falls
-        else half(false, k, dir, idx + 1, -cos, 0.3 * Math.sin(Math.PI * e)) // new bottom drops in
-        const ym = ry[k] + (rh[k] >> 1)
-        ctx.fillStyle = 'rgba(8,4,2,0.55)'
-        ctx.fillRect(rx[k], ym - 1, rw[k], Math.max(1, Math.round(dpr * 0.5)))
-        ctx.fillStyle = 'rgba(255,255,255,0.08)'
-        ctx.fillRect(rx[k], ym, rw[k], Math.max(1, Math.round(dpr * 0.5)))
-    }
+    // split-flap cell k at flap position f (0..FLAPS), pixelated -> photo
+  function flip(k: number, f: number) {
+    const idx = Math.floor(f)
+      const e = easeInOutCubic(f - idx) // eased fold angle: theta = PI * e
+      const cos = Math.cos(Math.PI * e)
+      // static halves behind the flap: new top, old bottom
+      half(true, k, idx + 1, 1, 0)
+      half(false, k, idx, 1, 0)
+      if (e < 0.5) half(true, k, idx, cos, 0.3 * Math.sin(Math.PI * e)) // old top falls
+      else half(false, k, idx + 1, -cos, 0.3 * Math.sin(Math.PI * e)) // new bottom drops in
+      const ym = ry[k] + (rh[k] >> 1)
+      ctx.fillStyle = 'rgba(8,4,2,0.55)'
+      ctx.fillRect(rx[k], ym - 1, rw[k], Math.max(1, Math.round(dpr * 0.5)))
+      ctx.fillStyle = 'rgba(255,255,255,0.08)'
+      ctx.fillRect(rx[k], ym, rw[k], Math.max(1, Math.round(dpr * 0.5)))
+  }
 
     function draw() {
       ctx.clearRect(0, 0, cv.width, cv.height)
@@ -236,22 +208,24 @@ export default function Hero() {
         ctx.drawImage(pixelCv, 0, 0)
         if (P > 0.001) { ctx.globalAlpha = Math.min(1, P); ctx.drawImage(photoCv, 0, 0); ctx.globalAlpha = 1 }
       }
-      // 1) settled original cells: straight 1:1 blits
-      for (let k = 0; k < N; k++) {
-        const c = cells[k]
-        if (!reduced && sf[k] >= 1) ctx.drawImage(photoCv, rx[k], ry[k], rw[k], rh[k], rx[k], ry[k], rw[k], rh[k])
-        else if (c.at === 1 && c.t < 0) ctx.drawImage(photoCv, rx[k], ry[k], rw[k], rh[k], rx[k], ry[k], rw[k], rh[k])
-      }
-      // 2) scroll-driven flips (deterministic from progress; hover flips take precedence on their cell)
-      if (!reduced) for (let k = 0; k < N; k++) {
-        const f = sf[k]
-        if (f > 0 && f < 1 && cells[k].t < 0 && cells[k].at === 0) flip(k, 1, Math.min(FLAPS - 1e-6, f * FLAPS))
-      }
-      // 3) hover flips
-      for (let k = 0; k < N; k++) {
-        const c = cells[k]
-        if (c.t < 0 || c.delay > 0) continue
-        flip(k, c.dir, Math.min(FLAPS - 1e-6, (c.t / (FLAPS * FLAP_MS)) * FLAPS))
+      if (!reduced) {
+        // 1) settled cells: merge horizontal runs into one 1:1 blit each
+        for (let j = 0; j < ROWS; j++) {
+          let i = 0
+          while (i < COLS) {
+            if (sf[j * COLS + i] < 1) { i++; continue }
+            const a = j * COLS + i
+            while (i < COLS && sf[j * COLS + i] >= 1) i++
+            const b = j * COLS + i - 1
+            const x = rx[a], y = ry[a], w = rx[b] + rw[b] - x, h = rh[a] > rh[b] ? rh[a] : rh[b]
+            ctx.drawImage(photoCv, x, y, w, h, x, y, w, h)
+          }
+        }
+        // 2) in-flight cells, deterministic from scroll progress
+        for (let k = 0; k < N; k++) {
+          const f = sf[k]
+          if (f > 0 && f < 1) flip(k, Math.min(FLAPS - 1e-6, f * FLAPS))
+        }
       }
     }
 
@@ -274,19 +248,6 @@ export default function Hero() {
       if (!running()) { lastT = 0; return }
       const dt = lastT ? Math.min(MAX_DT, (t - lastT) / 1000) : 1 / 60
       lastT = t
-      const dtMs = dt * 1000
-
-      if (pendingMove) {
-        const r = el.getBoundingClientRect() // single layout read per frame
-        tx = lastClientX - r.left; ty = lastClientY - r.top
-        pendingMove = false
-        if (!hasPointer) { cx = tx; cy = ty; hasPointer = true }
-      }
-      if (reduced) { cx = tx; cy = ty }
-      else { cx = damp(cx, tx, CURSOR_HALF_LIFE, dt); cy = damp(cy, ty, CURSOR_HALF_LIFE, dt) }
-      const rTarget = active ? RADIUS_CELLS : 0
-      radius = reduced ? rTarget : damp(radius, rTarget, RADIUS_HALF_LIFE, dt)
-      if (Math.abs(radius - rTarget) < 0.01) radius = rTarget
 
       // scroll progress: eased follow of the target, then per-cell flip progress
       const pT = progressRef.current
@@ -297,96 +258,14 @@ export default function Hero() {
         const t0 = thr[k] * (1 - FLIP_SPAN)
         sf[k] = Math.min(1, Math.max(0, (rp - t0) / FLIP_SPAN))
       }
-      const ccx = (cx * dpr - gdx) / gcw, ccy = (cy * dpr - gdy) / gch
-      const ar = gch / gcw
-      let busy = false
-      for (let j = 0; j < ROWS; j++) {
-        for (let i = 0; i < COLS; i++) {
-          const k = j * COLS + i
-          const c = cells[k]
-          if (!reduced && sf[k] >= 1) { c.at = 0; c.t = -1; c.delay = 0; continue } // fully resolved: hover is moot
-          const ddx = i + 0.5 - ccx, ddy = (j + 0.5 - ccy) * ar
-          const d = Math.sqrt(ddx * ddx + ddy * ddy)
-          // soft edge: per-cell jitter on the radius; hysteresis on the way out
-          const edge = radius + noise[k] * EDGE_JITTER * (radius > 0 ? 1 : 0)
-          const inside = radius > 0.05 && d <= edge
-          const outside = d > edge + HYSTERESIS || radius <= 0.05
-          if (c.t < 0) {
-            const want = inside ? 1 : outside ? 0 : c.at
-            if (c.at !== want) {
-              c.dir = want as 0 | 1
-              if (reduced) c.at = c.dir
-              else { c.t = 0; c.delay = d * WAVE_MS_PER_CELL + j * ROW_MS + i * COL_MS }
-            }
-          } else if (c.delay > 0 && ((c.dir === 1 && outside) || (c.dir === 0 && inside))) {
-            c.t = -1; c.delay = 0 // still waiting to flip the other way: cancel
-          }
-          if (c.t >= 0) {
-            busy = true
-            if (c.delay > 0) c.delay -= dtMs
-            else {
-              c.t += dtMs
-              if (c.t >= FLAPS * FLAP_MS) { c.at = c.dir; c.t = -1; c.delay = 0 }
-            }
-          }
-        }
-      }
       draw()
-      const settling = Math.abs(cx - tx) > 0.3 || Math.abs(cy - ty) > 0.3
-      const scrolling = P !== pT
-      if (busy || settling || scrolling || radius !== rTarget) raf = requestAnimationFrame(step)
+      if (P !== pT) raf = requestAnimationFrame(step)
       else lastT = 0
     }
 
     function kick() {
       if (!raf && running() && ready >= 2) raf = requestAnimationFrame(step)
     }
-
-    const setTarget = (e: PointerEvent) => {
-      lastClientX = e.clientX; lastClientY = e.clientY; pendingMove = true
-      window.clearTimeout(holdTimer)
-      active = true
-      kick()
-    }
-    const leave = () => { active = false; kick() }
-    const lingerThenLeave = () => {
-      window.clearTimeout(holdTimer)
-      holdTimer = window.setTimeout(leave, TAP_HOLD_MS)
-    }
-
-    // Touch: the hero uses touch-action: pan-y, so vertical drags scroll the page (the browser
-    // then fires pointercancel). Reveal only on tap, long-press, or a horizontal-dominant drag.
-    let sx = 0, sy = 0, dragging = false
-    const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== 'touch') { setTarget(e); return }
-      sx = e.clientX; sy = e.clientY; dragging = false
-      lastClientX = e.clientX; lastClientY = e.clientY
-      window.clearTimeout(pressTimer)
-      pressTimer = window.setTimeout(() => { dragging = true; pendingMove = true; active = true; window.clearTimeout(holdTimer); kick() }, LONG_PRESS_MS)
-    }
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== 'touch') { setTarget(e); return }
-      lastClientX = e.clientX; lastClientY = e.clientY
-      if (!dragging) {
-        const ax = Math.abs(e.clientX - sx), ay = Math.abs(e.clientY - sy)
-        if (ax > DRAG_PX && ax > ay) { dragging = true; window.clearTimeout(pressTimer); setTarget(e) }
-        return
-      }
-      setTarget(e)
-    }
-    const onUp = (e: PointerEvent) => {
-      if (e.pointerType !== 'touch') return
-      window.clearTimeout(pressTimer)
-      if (!dragging) setTarget(e) // quick tap: reveal here
-      dragging = false
-      lingerThenLeave()
-    }
-    const onCancel = (e: PointerEvent) => {
-      window.clearTimeout(pressTimer)
-      dragging = false
-      if (e.pointerType === 'touch') lingerThenLeave(); else leave()
-    }
-    const onLeave = (e: PointerEvent) => { if (e.pointerType !== 'touch') leave() }
 
     const onVis = () => { tabVisible = !document.hidden; if (tabVisible) kick(); else { cancelAnimationFrame(raf); raf = 0; lastT = 0 } }
     const io = new IntersectionObserver(([en]) => {
@@ -395,12 +274,6 @@ export default function Hero() {
     }, { rootMargin: '50px' })
     io.observe(el)
 
-    el.addEventListener('pointerenter', onMove, { passive: true })
-    el.addEventListener('pointermove', onMove, { passive: true })
-    el.addEventListener('pointerdown', onDown, { passive: true })
-    el.addEventListener('pointerleave', onLeave, { passive: true })
-    el.addEventListener('pointercancel', onCancel, { passive: true })
-    el.addEventListener('pointerup', onUp, { passive: true })
     document.addEventListener('visibilitychange', onVis)
     mq.addEventListener('change', onMq)
     const ro = new ResizeObserver(resize)
@@ -411,19 +284,11 @@ export default function Hero() {
     return () => {
       kickRef.current = () => {}
       cancelAnimationFrame(raf)
-      window.clearTimeout(holdTimer)
-      window.clearTimeout(pressTimer)
       window.removeEventListener('load', startLoad)
       ro.disconnect()
       io.disconnect()
       document.removeEventListener('visibilitychange', onVis)
       mq.removeEventListener('change', onMq)
-      el.removeEventListener('pointerenter', onMove)
-      el.removeEventListener('pointermove', onMove)
-      el.removeEventListener('pointerdown', onDown)
-      el.removeEventListener('pointerleave', onLeave)
-      el.removeEventListener('pointercancel', onCancel)
-      el.removeEventListener('pointerup', onUp)
     }
   }, [])
 
