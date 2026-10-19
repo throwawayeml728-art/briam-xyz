@@ -7,36 +7,53 @@ import type { Photo } from '@/data/content'
 import { usePhotoGridSettings, usePhotoZoom } from '@/components/PhotoZoomProvider'
 import { orderPhotos } from '@/lib/photo-sort'
 
-type ColumnItem = { photo: Photo; index: number }
+type RowItem = { photo: Photo; index: number; ratio: number }
+type Row = { items: RowItem[]; sum: number }
 
-function estimateRelativeHeight(ratio?: string): number {
-  if (!ratio) return 4 / 3
+// width / height of a photo (data stores ratio as "w/h")
+function photoRatio(ratio?: string): number {
+  if (!ratio) return 3 / 4
   const [w, h] = ratio.split('/').map(Number)
-  if (!w || !h) return 4 / 3
-  return h / w
+  return w && h ? w / h : 3 / 4
 }
 
-function balancePhotosIntoColumns(
-  photos: Photo[],
-  columnCount: number,
-  gap: number,
-): ColumnItem[][] {
-  const columns: ColumnItem[][] = Array.from({ length: columnCount }, () => [])
-  const heights = new Array<number>(columnCount).fill(0)
-  const gapHeight = gap / 180
-
-  photos.forEach((photo, index) => {
-    let target = 0
-    for (let c = 1; c < columnCount; c++) {
-      if (heights[c] < heights[target]) target = c
+function greedyRows(items: RowItem[], rowWidthRatio: number): Row[] {
+  const rows: Row[] = []
+  let cur: RowItem[] = []
+  let sum = 0
+  for (const it of items) {
+    cur.push(it)
+    sum += it.ratio
+    if (sum >= rowWidthRatio) {
+      rows.push({ items: cur, sum })
+      cur = []
+      sum = 0
     }
+  }
+  if (cur.length) rows.push({ items: cur, sum })
+  return rows
+}
 
-    if (columns[target].length > 0) heights[target] += gapHeight
-    columns[target].push({ photo, index })
-    heights[target] += estimateRelativeHeight(photo.ratio)
-  })
-
-  return columns
+// Justified rows: every row spans the full width with zero gutters. Tile widths are proportional to
+// aspect ratio so row height is uniform. We try several target row heights and keep the one whose
+// last row ends up closest to the target height, so the final row is not stretched or squashed.
+function justifyPhotos(photos: Photo[], columns: number): Row[] {
+  const items: RowItem[] = photos.map((photo, index) => ({ photo, index, ratio: photoRatio(photo.ratio) }))
+  if (!items.length) return []
+  const avg = items.reduce((a, b) => a + b.ratio, 0) / items.length
+  const base = columns * avg // target sum of ratios per row (target height = width / base)
+  let best: Row[] = greedyRows(items, base)
+  let bestScore = Infinity
+  for (let k = -12; k <= 12; k++) {
+    const target = base * (1 + k * 0.025)
+    if (target < 1) continue
+    const rows = greedyRows(items, target)
+    const last = rows[rows.length - 1]
+    const full = rows.length > 1 ? rows.slice(0, -1).reduce((a, r) => a + r.sum, 0) / (rows.length - 1) : last.sum
+    const score = Math.abs(last.sum - full) / full + Math.abs(target - base) / base * 0.25
+    if (score < bestScore) { bestScore = score; best = rows }
+  }
+  return best
 }
 
 export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
@@ -122,9 +139,9 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
     close()
   }
 
-  const columns = useMemo(
-    () => balancePhotosIntoColumns(displayPhotos, grid.columns, grid.gap),
-    [displayPhotos, grid.columns, grid.gap],
+  const rows = useMemo(
+    () => justifyPhotos(displayPhotos, grid.columns),
+    [displayPhotos, grid.columns],
   )
 
   return (
@@ -134,7 +151,6 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
         className="photo-section"
         style={{
           maxWidth: grid.maxWidth,
-          padding: grid.padding,
         }}
       >
         <div className="photo-grid-controls">
@@ -168,16 +184,14 @@ export default function PhotoGrid({ photos = [] }: { photos?: Photo[] }) {
             </span>
           </label>
         </div>
-        <div
-          className="photo-grid"
-          style={{ gap: grid.gap }}
-        >
-          {columns.map((columnPhotos, col) => (
-            <div key={col} className="photo-column" style={{ gap: grid.gap }}>
-              {columnPhotos.map(({ photo, index }) => (
+        <div className="photo-grid">
+          {rows.map((row, r) => (
+            <div key={r} className="photo-row" style={{ aspectRatio: row.sum }}>
+              {row.items.map(({ photo, index, ratio }) => (
                 <PhotoTile
                   key={photo.src}
                   photo={photo}
+                  widthPct={(ratio / row.sum) * 100}
                   sizes={tileSizes(grid.columns)}
                   onOpen={() => openPhoto(index)}
                 />
@@ -265,13 +279,14 @@ function tileSizes(columns: number) {
   return `(max-width: 768px) ${Math.round(100 / columns)}vw, ${Math.round(100 / Math.min(columns, 4))}vw`
 }
 
-function PhotoTile({ photo, onOpen, sizes }: { photo: Photo; onOpen: () => void; sizes: string }) {
+function PhotoTile({ photo, onOpen, sizes, widthPct }: { photo: Photo; onOpen: () => void; sizes: string; widthPct: number }) {
   return (
     <div
       role="button"
       tabIndex={0}
       aria-label={`Open photo: ${photo.alt}`}
       className="photo-tile"
+      style={{ width: `${widthPct}%` }}
       onClick={onOpen}
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -281,7 +296,7 @@ function PhotoTile({ photo, onOpen, sizes }: { photo: Photo; onOpen: () => void;
       }}
     >
       {photo.src ? (
-        <div className="photo-tile-frame" style={{ aspectRatio: photo.ratio || '3/4' }}>
+        <div className="photo-tile-frame">
           <Image
             src={photo.src}
             alt={photo.alt}
@@ -298,7 +313,6 @@ function PhotoTile({ photo, onOpen, sizes }: { photo: Photo; onOpen: () => void;
       ) : (
         <div
           className="photo-tile-placeholder"
-          style={{ aspectRatio: photo.ratio || '3/4' }}
         >
           <span>{photo.alt} — coming soon</span>
         </div>
