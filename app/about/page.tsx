@@ -13,7 +13,7 @@ export default function AboutPage() {
           <p>{siteConfig.tagline} Based in {siteConfig.location}.</p>
         </div>
         <section className="site-section" style={{ maxWidth: '1100px', margin: '0 auto' }} aria-labelledby="work-heading">
-          <h2 id="work-heading" style={{ fontSize: '14px', fontWeight: 400, letterSpacing: '-0.01em', textTransform: 'none', color: '#888884', margin: 0, paddingBottom: '16px' }}>
+          <h2 id="work-heading" className="section-label" style={{ margin: 0, paddingBottom: '16px' }}>
             Work
           </h2>
           {workHistory.length === 0 ? (

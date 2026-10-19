@@ -51,12 +51,12 @@ export default function Projects({ viewAllHref }: { viewAllHref?: string } = {})
     <section
       id="projects"
       className="site-section"
-      style={{ maxWidth: '1100px', margin: '0 auto', borderBottom: '1px solid #e8e8e4' }}
+      style={{ maxWidth: '1100px', margin: '0 auto' }}
     >
       <div
-        style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid #e8e8e4' }}
+        style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--rule)' }}
       >
-        <h2 style={{ fontSize: '14px', fontWeight: 400, letterSpacing: '-0.01em', textTransform: 'none', color: '#888884', margin: 0 }}>
+        <h2 className="section-label" style={{ margin: 0 }}>
           Projects
         </h2>
         {viewAllHref && (

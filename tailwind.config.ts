@@ -9,13 +9,15 @@ const config: Config = {
     extend: {
       fontFamily: {
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
         sans: ['var(--font-serif)', 'Georgia', 'serif'],
       },
       colors: {
-        bg: '#fafaf8',
-        fg: '#1a1a18',
-        muted: '#888884',
-        border: '#e8e8e4',
+        bg: 'var(--bg)',
+        fg: 'var(--fg)',
+        muted: 'var(--muted)',
+        border: 'var(--rule)',
+        rust: 'var(--rust)',
       },
     },
   },
