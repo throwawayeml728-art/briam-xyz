@@ -1052,3 +1052,26 @@ a:focus-visible, button:focus-visible { outline-color: var(--rust); }
 }
 @media (max-width: 768px) { .footer-horizon { padding: 0 20px; } }
 .page-main > .photo-section ~ .footer-horizon { margin-top: clamp(20px, 3vw, 40px); }
+
+/* ─── Cowboys on horseback (same stipple engine, scripts/sources ink drawings) ─── */
+/* lone rider crossing the footer skyline, between West Mitten and the small butte;
+   left is a fraction of the content box so it tracks the width-scaled mesas */
+.footer-horizon .stipple.stipple--rider {
+  position: absolute; object-fit: fill; height: auto; opacity: 0.42;
+  width: clamp(30px, 4.6vw, 56px); left: calc(48px + (100% - 96px) * 0.385); bottom: 2px;
+  -webkit-mask-image: none; mask-image: none;
+}
+/* About: two riders heading off toward the hoodoo, hooves on the Work rule
+   (section padding-top 100px + 34px label = 134px; only shown >900px) */
+.about-work { position: relative; }
+.about-work > :not(.stipple) { position: relative; z-index: 1; }
+.stipple--pair { right: 200px; top: 0; width: 104px; opacity: 0.42; transform: translateY(calc(-100% + 134px)); }
+/* 404: cowboy standing with his horse in the valley foreground */
+.stipple--standing { left: calc(50% - 180px); bottom: calc(3vh + 26px); width: 120px; opacity: 0.46; }
+
+@media (max-width: 900px) { .stipple--pair { display: none; } }
+@media (max-width: 768px) { .footer-horizon .stipple.stipple--rider { left: calc(20px + (100% - 40px) * 0.385); } }
+@media (max-width: 640px) {
+  .stipple--standing { display: none; }
+  .footer-horizon .stipple.stipple--rider { opacity: 0.4; }
+}

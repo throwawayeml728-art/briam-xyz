@@ -1,6 +1,7 @@
 """Weighted-Voronoi stippling of Brian's landscape photos -> transparent orange-dot SVGs.
 
-Run: /workspace/venv-cv/bin/python scripts/stipple.py
+Run: /workspace/venv-cv/bin/python scripts/stipple.py [name ...]
+Also stipples the cowboy ink drawings in scripts/sources (FIGURES).
 Dot colour sampled from the reference icon's flat background (#DA6F4D).
 """
 import numpy as np, cv2
@@ -126,10 +127,66 @@ PIECES = {
                           fd=dict(l=.1, r=.1, t=.0, b=.4), hatch=(5, .3), cut=.06),
 }
 
+
+def figure_density(path, gw, ink_lo=8, ink_hi=92, gamma=1.0, floor=0.0, outline=0.0, band=2, thresh=0.12, pad=0.03,
+                   blur=0.0, edge=0.0):
+    """black-ink-on-white illustration -> density cropped to its silhouette.
+    dark ink = dense dots; `floor` keeps light-coloured bodies (a white horse) visible inside the
+    silhouette; `outline` boosts a `band`-px rim so the shape reads at tiny sizes."""
+    g = np.asarray(Image.open(path).convert("L")).astype(np.float32) / 255
+    h0, w0 = g.shape
+    gh = int(round(h0 * gw / w0))
+    g = cv2.resize(g, (gw, gh), interpolation=cv2.INTER_AREA)
+    a, b = np.percentile(g, ink_lo), np.percentile(g, ink_hi)
+    ink = 1 - np.clip((g - a) / (b - a + 1e-6), 0, 1)
+    if blur:  # merge fine hatching into tone so dots follow masses, not every line
+        ink = cv2.GaussianBlur(ink, (0, 0), blur)
+    # silhouette: anything inked, closed, holes filled (flood from the border)
+    m = (cv2.GaussianBlur(ink, (0, 0), 1.0) > thresh).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    ff = m.copy(); msk = np.zeros((gh + 2, gw + 2), np.uint8)
+    cv2.floodFill(ff, msk, (0, 0), 1)
+    m = m | (1 - ff)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    keep = np.zeros(n, bool); keep[1:] = st[1:, cv2.CC_STAT_AREA] > 0.002 * gw * gh
+    m = keep[lab].astype(np.float32)
+    rim = m - cv2.erode(m, np.ones((2 * band + 1, 2 * band + 1), np.uint8))
+    d = m * (floor + (1 - floor) * ink ** gamma)
+    d = np.clip(d + outline * rim, 0, 1)
+    if edge:  # internal contours (rider vs horse, horse vs horse)
+        e = np.abs(cv2.Laplacian(cv2.GaussianBlur(ink, (0, 0), 1.5), cv2.CV_32F, ksize=3))
+        d = np.clip(d + edge * m * e / (np.percentile(e[m > 0], 99) + 1e-6), 0, 1)
+    ys, xs = np.nonzero(m)
+    p = int(pad * gw)
+    y0, y1 = max(ys.min() - p, 0), min(ys.max() + p + 1, gh)
+    x0, x1 = max(xs.min() - p, 0), min(xs.max() + p + 1, gw)
+    return d[y0:y1, x0:x1]
+
+
+# cowboys on horseback from black-ink illustrations (scripts/sources)
+FIGURES = {
+    # lone rider walking right: crosses the footer skyline
+    "cowboy-rider": dict(src="scripts/sources/cowboy-rider.jpg", gw=300, n=1100, disp=56,
+                         kw=dict(gamma=1.3, floor=0.12, outline=0.5, band=2, blur=1.0, edge=0.25), dot=(0.8, 1.5)),
+    # two riders seen from behind: About page, under the hoodoo
+    "cowboy-pair": dict(src="scripts/sources/cowboy-pair.jpg", gw=360, n=2600, disp=120,
+                        kw=dict(gamma=1.8, floor=0.06, outline=0.55, band=2, blur=1.2, edge=0.35), dot=(0.75, 1.6)),
+    # cowboy standing beside his (pale) horse: 404 roadside
+    "cowboy-standing": dict(src="scripts/sources/cowboy-standing.jpg", gw=360, n=2600, disp=130,
+                            kw=dict(gamma=1.5, floor=0.08, outline=0.6, band=2, blur=1.2, edge=0.4), dot=(0.75, 1.6)),
+}
+
 if __name__ == "__main__":
     import os, sys
     os.makedirs(OUT, exist_ok=True)
     only = sys.argv[1:]
+    for name, c in FIGURES.items():
+        if only and name not in only:
+            continue
+        d = figure_density(c["src"], c["gw"], **c["kw"])
+        d[d < c.get("cut", 0.03)] = 0
+        pts, tone = stipple(d, c["n"])
+        write_svg(name, pts, tone, d.shape, c["disp"], dmin=c["dot"][0], dmax=c["dot"][1])
     for name, c in PIECES.items():
         if only and name not in only:
             continue

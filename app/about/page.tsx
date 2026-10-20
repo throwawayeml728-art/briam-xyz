@@ -14,7 +14,8 @@ export default function AboutPage() {
           <h1>About</h1>
           <p>{siteConfig.tagline} Based in {siteConfig.location}.</p>
         </div>
-        <section className="site-section" style={{ maxWidth: '1100px', margin: '0 auto' }} aria-labelledby="work-heading">
+        <section className="site-section about-work" style={{ maxWidth: '1100px', margin: '0 auto' }} aria-labelledby="work-heading">
+          <Stipple name="cowboy-pair" className="stipple--pair" />
           <h2 id="work-heading" className="section-label" style={{ margin: 0, paddingBottom: '16px' }}>
             Work
           </h2>

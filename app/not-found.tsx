@@ -8,6 +8,7 @@ export default function NotFound() {
       <p>That page doesn&rsquo;t exist.</p>
       <Link href="/">Back home</Link>
       <Stipple name="road-valley" className="stipple--404" />
+      <Stipple name="cowboy-standing" className="stipple--standing" />
     </main>
   )
 }

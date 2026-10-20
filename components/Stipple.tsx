@@ -6,6 +6,9 @@ const SIZES = {
   'hoodoo-corner': [720, 1702],
   'road-valley': [1440, 572],
   'merrick-butte': [840, 510],
+  'cowboy-rider': [468, 432],
+  'cowboy-pair': [520, 526],
+  'cowboy-standing': [658, 534],
 } as const
 
 export type StippleName = keyof typeof SIZES

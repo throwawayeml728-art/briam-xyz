@@ -13,6 +13,7 @@ export default function Footer() {
     <>
     <div className="footer-horizon" aria-hidden="true">
       <Stipple name="horizon-mesas" />
+      <Stipple name="cowboy-rider" className="stipple--rider" />
     </div>
     <footer className="site-footer">
       <div className="site-footer-main">
