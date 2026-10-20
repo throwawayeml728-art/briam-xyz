@@ -17,3 +17,4 @@ out/
 *.pem
 npm-debug.log*
 .vercel
+__pycache__/
