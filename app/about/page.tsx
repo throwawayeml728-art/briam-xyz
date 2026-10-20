@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Footer from '@/components/Footer'
+import Stipple from '@/components/Stipple'
 import { siteConfig, workHistory } from '@/data/content'
 
 export const metadata: Metadata = { title: 'About · Brian Landauer', openGraph: { title: 'About · Brian Landauer' } }
@@ -9,6 +10,7 @@ export default function AboutPage() {
     <main id="main" className="page-main">
       <div>
         <div className="about-intro">
+          <Stipple name="hoodoo-corner" className="stipple--about" />
           <h1>About</h1>
           <p>{siteConfig.tagline} Based in {siteConfig.location}.</p>
         </div>

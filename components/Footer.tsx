@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { siteConfig } from '@/data/content'
+import Stipple from '@/components/Stipple'
 
 const socialLinks = [
   ['LinkedIn', siteConfig.social.linkedin],
@@ -9,6 +10,10 @@ const socialLinks = [
 
 export default function Footer() {
   return (
+    <>
+    <div className="footer-horizon" aria-hidden="true">
+      <Stipple name="horizon-mesas" />
+    </div>
     <footer className="site-footer">
       <div className="site-footer-main">
         <p className="site-footer-tagline">
@@ -37,5 +42,6 @@ export default function Footer() {
         })}
       </nav>
     </footer>
+    </>
   )
 }

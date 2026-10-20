@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { projects, type Project } from '@/data/content'
+import Stipple from '@/components/Stipple'
 
 function ProjectCard({ project, i }: { project: Project; i: number }) {
   const inner = (
@@ -54,8 +55,10 @@ export default function Projects({ viewAllHref }: { viewAllHref?: string } = {})
       style={{ maxWidth: '1100px', margin: '0 auto' }}
     >
       <div
+        className="projects-heading"
         style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--rule)' }}
       >
+        <Stipple name="merrick-butte" className={`stipple--projects-heading${viewAllHref ? '' : ' stipple--projects-heading-page'}`} />
         <h2 className="section-label" style={{ margin: 0 }}>
           Projects
         </h2>

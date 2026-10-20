@@ -984,3 +984,71 @@ a:focus-visible, button:focus-visible { outline-color: var(--rust); }
 
 @media (max-width: 768px) { .site-footer::before { left: 20px; right: 20px; } }
 .home-heading h2, .about-intro h1, .not-found h1 { font-family: var(--font-display), Georgia, serif; }
+
+/* ─── Stipple-engraving accents (public/art, scripts/stipple.py) ─────── */
+.stipple {
+  position: absolute; display: block; pointer-events: none; user-select: none;
+  height: auto; max-width: none; opacity: 0.34; z-index: 0;
+}
+.home-heading, .projects-heading, .about-intro, .not-found { position: relative; }
+.home-heading > :not(.stipple), .projects-heading > :not(.stipple),
+.about-intro > :not(.stipple), .not-found > :not(.stipple) { position: relative; z-index: 1; }
+
+/* Photography heading row: lone butte in the gap left of "View all" */
+.stipple--photo-heading {
+  right: clamp(110px, 12vw, 200px); bottom: -12px; width: clamp(150px, 14vw, 190px); opacity: 0.42;
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 45% 55%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 70% at 45% 55%, #000 40%, transparent 100%);
+}
+/* Projects heading row: Merrick Butte sitting on the rule */
+.stipple--projects-heading {
+  right: clamp(120px, 13vw, 200px); bottom: -2px; width: clamp(160px, 14vw, 190px); opacity: 0.4;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 22%, #000 82%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 22%, #000 82%, transparent);
+}
+.stipple--projects-heading-page { right: 0; }
+
+/* faint Monument Valley skyline standing on the footer's double rule */
+.footer-horizon {
+  position: relative; max-width: 1100px; width: 100%; margin: 0 auto; padding: 0 48px;
+  height: clamp(64px, 10vw, 132px); box-sizing: border-box; pointer-events: none; overflow: hidden;
+}
+.footer-horizon .stipple {
+  position: static; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; opacity: 0.3;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+}
+
+/* About: hoodoo spire in the empty right half of the intro */
+.stipple--about {
+  right: 40px; top: 56px; width: 150px; opacity: 0.38;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 45%, transparent 100%);
+}
+
+/* /projects: hoodoo fading into the left page margin */
+.page-main--projects { position: relative; }
+.page-main > .stipple--projects-margin {
+  width: 150px; left: max(8px, calc((100vw - 1100px) / 2 - 150px)); top: 140px; opacity: 0.32;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 60%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 60%, transparent);
+}
+
+/* 404: Monument Valley engraving under the message */
+.not-found { overflow: hidden; }
+.stipple--404 {
+  left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(760px, 92vw); opacity: 0.36;
+  -webkit-mask-image: linear-gradient(to top, transparent, #000 35%);
+  mask-image: linear-gradient(to top, transparent, #000 35%);
+}
+
+@media (max-width: 1360px) { .page-main > .stipple--projects-margin { display: none; } }
+@media (max-width: 900px) { .stipple--about { display: none; } }
+@media (max-width: 640px) {
+  .stipple--photo-heading, .stipple--projects-heading { display: none; }
+  .footer-horizon { padding: 0 20px; }
+  .footer-horizon .stipple { opacity: 0.26; }
+  .stipple--404 { width: 120vw; opacity: 0.26; }
+}
+@media (max-width: 768px) { .footer-horizon { padding: 0 20px; } }
+.page-main > .photo-section ~ .footer-horizon { margin-top: clamp(20px, 3vw, 40px); }

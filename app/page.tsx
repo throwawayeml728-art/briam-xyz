@@ -3,6 +3,7 @@ import Hero from '@/components/Hero'
 import PhotoGrid from '@/components/PhotoGrid'
 import Projects from '@/components/Projects'
 import Footer from '@/components/Footer'
+import Stipple from '@/components/Stipple'
 import { getPhotos } from '@/lib/photos'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,7 @@ export default function Home() {
       <div className="home-content">
         <div id="photography" className="home-anchor" />
         <div className="home-heading">
+          <Stipple name="butte-mitten" className="stipple--photo-heading" />
           <h2>Photography</h2>
           <Link href="/photos" className="home-link">View all <span aria-hidden="true">→</span></Link>
         </div>
