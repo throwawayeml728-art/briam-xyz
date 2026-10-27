@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Hero from '@/components/Hero'
 import PhotoGrid from '@/components/PhotoGrid'
 import Projects from '@/components/Projects'
 import Footer from '@/components/Footer'
@@ -15,7 +14,6 @@ export default function Home() {
 
   return (
     <main id="main" className="home-main">
-      <Hero />
       <div className="home-content">
         <div id="photography" className="home-anchor" />
         <div className="home-heading">

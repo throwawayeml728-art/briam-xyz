@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     url: 'https://fifthdegree.xyz',
     siteName: 'Brian Landauer',
     type: 'website',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Engraved geologic-map style rendering of Monument Valley buttes on cream paper' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Brian Landauer — builder, photographer, curious person' }],
   },
   twitter: { card: 'summary_large_image', title: 'Brian Landauer', description, images: ['/og.jpg'] },
 }

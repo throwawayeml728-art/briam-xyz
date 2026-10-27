@@ -653,71 +653,7 @@ body {
   }
 }
 
-/* ─── Home hero: procedural geologic relief plate (scripts/make-desert.py) ─ */
-.hero {
-  position: relative;
-  height: 94vh;
-  height: 94svh;
-  min-height: 520px;
-  max-height: 1100px;
-  overflow: hidden;
-  background: var(--bg);
-}
-.hero-img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center 62%;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-/* belt and braces: the plate already fades to --bg; this guarantees a seamless edge */
-.hero::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 14%;
-  background: linear-gradient(to bottom, rgba(243, 234, 217, 0), var(--bg));
-  pointer-events: none;
-}
-.hero-plate {
-  position: absolute; inset: 0; pointer-events: none;
-  color: var(--leather);
-  font-family: var(--font-serif), Georgia, serif;
-}
-.hero-title {
-  position: absolute; left: clamp(28px, 6vw, 96px); top: calc(60px + 7%);
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  line-height: 1.15;
-}
-.hero-title-kicker { font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; }
-.hero-title-of { font-size: 11px; font-style: italic; margin: 3px 0 1px; }
-.hero-title-main {
-  font-size: clamp(17px, 1.55vw, 23px); letter-spacing: 0.16em; text-transform: uppercase;
-  padding: 5px 0 6px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor;
-  box-shadow: 0 -3px 0 -2px var(--bg), 0 -4px 0 -2px currentColor, 0 3px 0 -2px var(--bg), 0 4px 0 -2px currentColor;
-  color: var(--fg);
-}
-.hero-title-sub { font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; margin-top: 7px; }
-.hero-scale { display: flex; margin-top: 12px; border: 1px solid currentColor; }
-.hero-scale i { display: block; width: 18px; height: 4px; }
-.hero-scale i:nth-child(odd) { background: currentColor; }
-.hero-scale-label { font-size: 9px; font-style: italic; margin-top: 3px; letter-spacing: 0.08em; }
-.hero-legend {
-  position: absolute; right: clamp(28px, 6vw, 96px); top: calc(60px + 7%);
-  margin: 0; padding: 0; list-style: none;
-  display: flex; flex-direction: column; gap: 5px;
-  font-size: 10px; font-style: italic; letter-spacing: 0.02em; line-height: 1;
-}
-.hero-legend li { display: flex; align-items: center; gap: 8px; }
-.hero-legend i { width: 20px; height: 9px; border: 1px solid rgba(43, 29, 20, 0.7); flex: none; }
-@media (max-aspect-ratio: 4/5) {
-  .hero { height: 92svh; min-height: 0; }
-  .hero-img { object-position: center 55%; }
-  .hero-title { left: 50%; transform: translateX(-50%); top: calc(64px + 7%); }
-  .hero-title-main { font-size: 18px; }
-  .hero-legend { display: none; }
-}
-@media (max-width: 900px) and (min-aspect-ratio: 4/5) { .hero-legend { display: none; } }
-
-.home-main { background: var(--bg); overflow-x: clip; }
+.home-main { background: var(--bg); overflow-x: clip; padding-top: calc(60px + env(safe-area-inset-top, 0px)); }
 .home-content { position: relative; z-index: 1; background: var(--bg); }
 .home-anchor { scroll-margin-top: 0; }
 #photography, #projects { scroll-margin-top: 60px; }
@@ -1085,7 +1021,7 @@ a:focus-visible, button:focus-visible { outline-color: var(--rust); }
   .footer-horizon .stipple.stipple--rider { opacity: 0.4; }
 }
 
-/* Home nav over the paper-map hero: cream pill, ink type */
+/* Home nav on the flat cream page: cream pill, ink type (stays legible over the photo grid) */
 .site-nav--home .site-nav-links,
 .site-nav--home .site-nav-links[class] {
   background: rgba(243, 234, 217, 0.72);
