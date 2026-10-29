@@ -3,6 +3,7 @@ import PhotoGrid from '@/components/PhotoGrid'
 import Projects from '@/components/Projects'
 import Footer from '@/components/Footer'
 import Stipple from '@/components/Stipple'
+import ReadingTeaser from '@/components/ReadingTeaser'
 import { getPhotos } from '@/lib/photos'
 
 export const dynamic = 'force-dynamic'
@@ -23,6 +24,7 @@ export default function Home() {
         </div>
         <PhotoGrid photos={photos} />
         <Projects viewAllHref="/projects" />
+        <ReadingTeaser />
         <Footer />
       </div>
     </main>
