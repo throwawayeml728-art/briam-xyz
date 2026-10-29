@@ -24,6 +24,9 @@ const COPIES = 3
 const BLOTS: [number, number, number][] = [[150, 330, 0], [340, 600, 120], [250, 120, 220], [90, 760, 300], [400, 250, 360], [260, 860, 420], [230, 470, 180]]
 
 const smooth = (x: number) => x * x * (3 - 2 * x)
+// slow ink bleed: gentle start, long soft tail
+const inkEase = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2) * 0.75 + p * 0.25
+const INK_DUR = 1600, INK_R = 400, INK_STAGGER = 1.8
 const mod = (a: number, n: number) => ((a % n) + n) % n
 const shortTitle = (t: string) => t.split(':')[0].trim()
 const surname = (a: string) => a.trim().split(/\s+/).pop() || a
@@ -67,15 +70,17 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
     tiltX: 0, tiltY: 0, hover: -1, lift: new Float32Array(V), last: 0,
     drag: null as null | { id: number; x0: number; T0: number; on: boolean },
     suppress: false, inkR: 0.66, wheelT: 0 as any, open: false, closing: false, inkStart: 0,
-    cx: 0, cyCur: 0, cur: { x: -100, y: -100 }, reduced: false, fine: false,
+    m: 1, mT: 1, rest: false, cx: 0, cyCur: 0, cur: { x: -100, y: -100 }, reduced: false, fine: false,
   })
 
   const geo = () => { const H = st.current.H; const ws = (H * 142) / 840; return { H, ws, d: 0.66 * H, gap: 0.03 * H } }
 
   // ---------- caption ----------
   const swapCaption = useCallback((i: number, dir: number, instant: boolean) => {
-    const b = books[i]
-    const texts = [b.title, b.author, `${statusLabel(b)} \u00b7 ${String(i + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`]
+    const b = books[Math.max(0, i)]
+    const texts = i < 0
+      ? ['On the Shelf', `${N} books`, 'Reading now & old favorites']
+      : [b.title, b.author, `${statusLabel(b)} \u00b7 ${String(i + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`]
     capRefs.current.forEach((line, k) => {
       if (!line) return
       const span = document.createElement('span')
@@ -99,7 +104,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
   // ---------- tabs indicator ----------
   useLayoutEffect(() => {
     const ind = indRef.current
-    const el = tab > 0 ? tabRefs.current[tab] : null
+    const el = tab >= 0 ? tabRefs.current[tab] : null
     if (!ind) return
     if (!el) { ind.style.width = '0px'; return }
     ind.style.width = `${el.offsetWidth}px`
@@ -107,15 +112,23 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
   }, [tab])
 
   // ---------- navigation ----------
-  const go = useCallback((delta: number) => { const s = st.current; if (s.open) return; s.T = Math.round(s.T) + delta }, [])
+  // leave the ALL rest state: the nearest book turns back out
+  const wake = () => { const s = st.current; if (!s.rest) return false; s.rest = false; s.mT = 1; s.T = Math.round(s.T); s.active = -2; return true }
+  const toRest = () => {
+    const s = st.current; if (s.rest) return
+    s.rest = true; s.mT = 0; s.T = Math.round(s.T)
+    swapCaption(-1, 1, false); s.active = -3; setTab(0)
+  }
+  const go = useCallback((delta: number) => { const s = st.current; if (s.open) return; if (wake()) return; s.T = Math.round(s.T) + delta }, [])
   const goTo = useCallback((idx: number) => {
-    const s = st.current; if (s.open) return
+    const s = st.current; if (s.open) return; wake()
     const base = Math.round(s.T)
     let d = mod(idx - mod(base, N), N); if (d > N / 2) d -= N
     s.T = base + d
   }, [N])
   const jumpGroup = (g: 0 | 1 | 2) => {
-    const idx = g === 0 ? 0 : books.findIndex((b) => b.status === (g === 1 ? 'reading' : 'favorite'))
+    if (g === 0) { if (st.current.open) closeDetail(); toRest(); return }
+    const idx = books.findIndex((b) => b.status === (g === 1 ? 'reading' : 'favorite'))
     if (idx >= 0) goTo(idx)
   }
 
@@ -137,7 +150,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
 
   const openDetail = useCallback(() => {
     const s = st.current
-    if (s.open || s.active < 0) return
+    if (s.open || s.active < 0 || s.rest) return
     s.open = true
     if (curRef.current) curRef.current.dataset.state = ''
     setDetail(s.active)
@@ -228,14 +241,19 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       if (s.reduced && !s.drag?.on) s.s = s.T
       else s.s += (s.T - s.s) * (1 - Math.exp(-(s.drag?.on ? 18 : 5.2) * dt))
       if (Math.abs(s.T - s.s) < 1e-4) s.s = s.T
+      // openness multiplier: 1 = active book turned out, 0 = plain shelf (ALL)
+      if (s.reduced) s.m = s.mT
+      else s.m += (s.mT - s.m) * (1 - Math.exp(-5.2 * dt))
+      if (Math.abs(s.mT - s.m) < 1e-3) s.m = s.mT
+      const m = s.m
       // keep s in the middle copy
       const loops = Math.floor(s.s / N) - 1
       if (loops) { s.s -= loops * N; s.T -= loops * N; if (s.drag) s.drag.T0 -= loops * N }
 
       const active = mod(Math.round(s.s), N)
-      if (active !== s.active) {
+      if (!s.rest && active !== s.active) {
         const dir = Math.sign(s.T - s.s) || 1
-        swapCaption(active, dir, s.active < 0)
+        swapCaption(active, dir, s.active === -1)
         s.active = active
         setTab(books[active].status === 'reading' ? 1 : 2)
       }
@@ -243,7 +261,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       // tilt toward the cursor
       const settled = Math.abs(s.T - s.s) < 0.3
       let ty = 0, tx = 0
-      if (s.inside && !s.open) {
+      if (s.inside && !s.open && !s.rest) {
         const onCover = settled && Math.abs(s.mx - W / 2) < 0.55 * d && Math.abs(s.my - s.cy) < 0.55 * H
         if (onCover) { ty = ((s.mx - W / 2) / (0.55 * d)) * 9; tx = -((s.my - s.cy) / (H / 2)) * 6 }
         else ty = ((s.mx - W / 2) / W) * 5
@@ -255,10 +273,13 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       for (let v = 0; v < V; v++) {
         const el = tapeRefs.current[v]; if (!el) continue
         let r = mod(v - s.s, V); if (r >= V / 2) r -= V
-        const x = r * (ws + gap) + (d - ws + 1.6 * gap) * B(r)
+        const x = r * (ws + gap) + (d - ws + 1.6 * gap) * B(r) * m
         if (Math.abs(x) > W / 2 + 1.5 * d) { if (el.style.visibility !== 'hidden') el.style.visibility = 'hidden'; continue }
         if (el.style.visibility) el.style.visibility = ''
-        const o = smooth(Math.max(0, 1 - Math.abs(r)))
+        const o = smooth(Math.max(0, 1 - Math.abs(r))) * m
+        // only a turning book shows its cover face; at rest the side face would peek out under perspective
+        const cv = coverRefs.current[v]
+        if (cv) { const want = o > 0.004 ? '' : 'hidden'; if (cv.style.visibility !== want) cv.style.visibility = want }
         const lt = v === s.hover && Math.abs(r) > 0.5 && !s.drag?.on ? 1 : 0
         s.lift[v] += (lt - s.lift[v]) * kl
         const y = -o * 0.025 * H - s.lift[v] * 0.045 * H
@@ -271,7 +292,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       // play ring
       const pr = playRef.current
       if (pr) {
-        const sc = s.reduced ? (settled ? 1 : 0) : smooth(Math.max(0, 1 - Math.abs(s.T - s.s) * 3))
+        const sc = (s.reduced ? (settled ? 1 : 0) : smooth(Math.max(0, 1 - Math.abs(s.T - s.s) * 3))) * (s.rest ? 0 : m)
         pr.style.transform = `translate(-50%,-50%) scale(${sc.toFixed(3)})`
         pr.style.left = `${W / 2 - 0.5 * d - 6}px`
         pr.style.top = `${s.cy - root.getBoundingClientRect().top + 0.36 * H}px`
@@ -290,8 +311,8 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
         const w = 600, h = 600 / s.inkR
         blobRefs.current.forEach((c, i) => {
           if (!c) return
-          const p = Math.min(1, Math.max(0, (t - s.inkStart - BLOTS[i][2]) / 1250))
-          c.setAttribute('r', ((1 - (1 - p) ** 3) * 720 * Math.max(w / 474, h / 900)).toFixed(1))
+          const p = Math.min(1, Math.max(0, (t - s.inkStart - BLOTS[i][2] * INK_STAGGER) / INK_DUR))
+          c.setAttribute('r', (inkEase(p) * INK_R * Math.max(w / 474, h / 900)).toFixed(1))
         })
       }
     }
@@ -301,7 +322,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
     const overCover = (x: number, y: number) => {
       const { H, d } = geo(); const rr = root.getBoundingClientRect()
       const sc = PERSP / (PERSP - 0.2 * H)
-      return !s.open && Math.abs(s.T - s.s) < 0.3 && Math.abs(x - rr.left - s.W / 2) < 0.5 * d * sc && Math.abs(y - s.cy + 0.025 * H) < 0.5 * H * sc
+      return !s.open && !s.rest && s.m > 0.9 && Math.abs(s.T - s.s) < 0.3 && Math.abs(x - rr.left - s.W / 2) < 0.5 * d * sc && Math.abs(y - s.cy + 0.025 * H) < 0.5 * H * sc
     }
     // pointer: hover/lift, cursor state, tilt, drag
     const curState = (target: Element | null, x: number, y: number) => {
@@ -313,7 +334,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       else if (onShelf && overCover(x, y)) state = 'open'
       else if (tape) {
         let r = mod(+tape.dataset.v! - s.s, V); if (r >= V / 2) r -= V
-        state = Math.abs(r) < 0.5 ? 'open' : 'spine'
+        state = Math.abs(r) < 0.5 && !s.rest ? 'open' : 'spine'
       } else if (target?.closest?.('a,button,[role=button]')) state = 'btn'
       c.dataset.state = state
     }
@@ -328,7 +349,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       if (s.drag && e.pointerId === s.drag.id) {
         const dx = e.clientX - s.drag.x0
         if (!s.drag.on && Math.abs(dx) > 5) { s.drag.on = true; shelf.setPointerCapture(e.pointerId); shelf.classList.add('is-drag') }
-        if (s.drag.on) { const { ws, gap } = geo(); s.T = s.drag.T0 - dx / (ws + gap) }
+        if (s.drag.on) { if (s.rest) { s.rest = false; s.mT = 1; s.active = -2 } const { ws, gap } = geo(); s.T = s.drag.T0 - dx / (ws + gap) }
       }
     }
     const onLeave = () => { s.inside = false; s.hover = -1 }
@@ -346,13 +367,15 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       if (overCover(e.clientX, e.clientY)) { openDetail(); return }
       const tape = (e.target as Element).closest('.tape') as HTMLElement | null
       if (!tape) return
+      const wasRest = s.rest; if (s.rest) { s.rest = false; s.mT = 1; s.active = -2 }
       let r = mod(+tape.dataset.v! - s.s, V); if (r >= V / 2) r -= V
-      if (Math.abs(r) < 0.5 && Math.abs(s.T - s.s) < 0.3) openDetail()
+      if (!wasRest && Math.abs(r) < 0.5 && Math.abs(s.T - s.s) < 0.3) openDetail()
       else s.T = Math.round(s.T + r)
     }
     const onWheel = (e: WheelEvent) => {
       if (s.open) return
       e.preventDefault()
+      if (s.rest) { s.rest = false; s.mT = 1; s.active = -2 }
       const dl = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
       const { ws, gap } = geo()
       s.T += (dl * (e.deltaMode === 1 ? 16 : 1)) / (ws + gap) * 0.5
@@ -365,7 +388,7 @@ export default function VhsShelf({ books }: { books: ShelfBook[] }) {
       if (s.open) { if (e.key === 'Escape') { e.preventDefault(); closeDetail() } return }
       if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1) }
       else if (e.key === 'ArrowRight') { e.preventDefault(); go(1) }
-      else if (e.key === 'Enter' && !(e.target as HTMLElement)?.closest?.('a,button')) { e.preventDefault(); openDetail() }
+      else if (e.key === 'Enter' && !(e.target as HTMLElement)?.closest?.('a,button')) { e.preventDefault(); if (!wake()) openDetail() }
     }
     addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('pointerleave', onLeave)
