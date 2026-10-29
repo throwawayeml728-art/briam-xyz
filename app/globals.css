@@ -1162,3 +1162,7 @@ html.vs-locked { overflow: hidden; }
   .vs-sheet-title { font-size: 42px; }
 }
 @media (max-width: 767px) { .vs-cap-title .vs-cap-in { white-space: normal; line-height: 1.2; padding-bottom: 3px; } }
+
+/* ALL: face-out grid may run past the hero band on small screens */
+.vs.is-grid { overflow-x: clip; overflow-y: visible; }
+.vs.is-grid .vs-shelf { cursor: default; }
