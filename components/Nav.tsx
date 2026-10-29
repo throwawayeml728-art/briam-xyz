@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { hasBooks } from '@/data/books'
 
 const links = [
   ['Home', '/'],
   ['Photos', '/photos', '/#photography'],
   ['Projects', '/projects', '/#projects'],
+  ...(hasBooks ? [['Books', '/books'] as const] : []),
   ['About', '/about'],
 ] as readonly (readonly [string, string, string?])[]
 
