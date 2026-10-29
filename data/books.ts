@@ -13,6 +13,8 @@ export interface Book {
   coverUrl?: string
   /** ISBN-10 or ISBN-13 (dashes OK); used for the Open Library cover. */
   isbn?: string
+  /** Book thickness in px on desktop (default: varies 14–24). */
+  thickness?: number
   /** Where the book links to (publisher, Bookshop, Goodreads, ...). */
   link?: string
 }

@@ -33,25 +33,44 @@ function useTock() {
   }, [])
 }
 
-function Cover({ book, onRatio }: { book: ShelfBook; onRatio: (r: number) => void }) {
+/** Average color of the cover's left edge, darkened a touch, for the spine face. */
+function sampleSpine(i: HTMLImageElement): string | null {
+  try {
+    const c = document.createElement('canvas'); c.width = 4; c.height = 32
+    const x = c.getContext('2d', { willReadFrequently: true }); if (!x) return null
+    x.drawImage(i, 0, 0, Math.max(1, i.naturalWidth * 0.06), i.naturalHeight, 0, 0, 4, 32)
+    const d = x.getImageData(0, 0, 4, 32).data; let r = 0, g = 0, b = 0
+    for (let k = 0; k < d.length; k += 4) { r += d[k]; g += d[k + 1]; b += d[k + 2] }
+    const n = d.length / 4, f = 0.82
+    return `rgb(${Math.round(r / n * f)},${Math.round(g / n * f)},${Math.round(b / n * f)})`
+  } catch { return null }
+}
+
+function Cover({ book, onRatio, onSpine }: { book: ShelfBook; onRatio: (r: number) => void; onSpine: (c: string) => void }) {
   const [failed, setFailed] = useState(false)
   const img = useRef<HTMLImageElement>(null)
   // Images can finish loading before hydration; read their dimensions on mount too.
   useEffect(() => {
     const i = img.current
-    if (i?.complete) { if (i.naturalWidth > 1) onRatio(i.naturalWidth / i.naturalHeight); else setFailed(true) }
-  }, [onRatio])
+    if (i?.complete) loaded(i)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  function loaded(i: HTMLImageElement) {
+    if (i.naturalWidth <= 1) return setFailed(true)
+    onRatio(i.naturalWidth / i.naturalHeight)
+    const c = sampleSpine(i); if (c) onSpine(c)
+  }
   if (book.cover && !failed) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img ref={img} src={book.cover} alt={`Cover of ${book.title} by ${book.author}`} loading="lazy" decoding="async"
-        onLoad={(e) => { const i = e.currentTarget; if (i.naturalWidth > 1) onRatio(i.naturalWidth / i.naturalHeight); else setFailed(true) }}
+        onLoad={(e) => loaded(e.currentTarget)}
         onError={() => setFailed(true)} />
     )
   }
   const [bg, fg] = PALETTE[hash(book.title + book.author) % PALETTE.length]
   return (
-    <div className="bk-type" role="img" aria-label={`${book.title} by ${book.author}`} style={{ background: bg, color: fg }}>
+    <div ref={() => onSpine(bg)} className="bk-type" role="img" aria-label={`${book.title} by ${book.author}`} style={{ background: bg, color: fg }}>
       <span className="bk-type-rule" aria-hidden="true" />
       <span className="bk-type-title">{book.title}</span>
       <span className="bk-type-author">{book.author}</span>
@@ -62,8 +81,10 @@ function Cover({ book, onRatio }: { book: ShelfBook; onRatio: (r: number) => voi
 
 function BookItem({ book, index, active, onActivate }: { book: ShelfBook; index: number; active: boolean; onActivate: (i: number | null, sound?: boolean) => void }) {
   const [ratio, setRatio] = useState(2 / 3)
+  const [spine, setSpine] = useState('#5a3a24')
   const scale = 0.94 + (hash(book.title) % 13) / 100 // natural height variation 0.94–1.06
-  const style = { '--r': ratio.toFixed(3), '--s': scale.toFixed(3) } as React.CSSProperties
+  const thick = book.thickness ?? 16 + (hash(book.author + book.title) % 9) // 16–24px
+  const style = { '--r': ratio.toFixed(3), '--s': scale.toFixed(3), '--t': thick, '--spine': spine } as React.CSSProperties
   const props = {
     className: `bk${active ? ' bk--active' : ''}${book.status === 'reading' ? ' bk--reading' : ''}`,
     style,
@@ -75,8 +96,15 @@ function BookItem({ book, index, active, onActivate }: { book: ShelfBook; index:
   }
   const inner = (
     <>
-      <span className="bk-body"><Cover book={book} onRatio={setRatio} /><span className="bk-pages" aria-hidden="true" /></span>
-      {book.status === 'reading' && <span className="bk-ribbon" aria-hidden="true" />}
+      <span className="bk-shadow" aria-hidden="true" />
+      <span className="bk-3d">
+        <span className="bk-face bk-back" aria-hidden="true" />
+        <span className="bk-face bk-top" aria-hidden="true" />
+        <span className="bk-face bk-pages" aria-hidden="true" />
+        <span className="bk-face bk-spine" aria-hidden="true" />
+        <span className="bk-face bk-front"><Cover book={book} onRatio={setRatio} onSpine={setSpine} /></span>
+        {book.status === 'reading' && <span className="bk-ribbon" aria-hidden="true" />}
+      </span>
       <span className="sr-only">{book.status === 'reading' ? ' (reading now)' : ''}</span>
     </>
   )
