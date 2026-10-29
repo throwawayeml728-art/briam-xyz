@@ -49,6 +49,13 @@ export const siteConfig = {
 // Entries without an image get a typographic fallback tile (large initial) automatically.
 export const projects: Project[] = [
   {
+    name: 'Bike Lessons NYC',
+    desc: 'A booking site for adult and kids bike lessons in New York City parks.',
+    year: '2026',
+    url: 'https://bikelessons.nyc',
+    image: '/projects/bike-lessons-nyc.webp',
+  },
+  {
     name: 'Dog Thanksgiving NYC',
     desc: 'A five-course, dog-safe Thanksgiving tasting menu in New York City.',
     year: '2026',
