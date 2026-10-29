@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import { Libre_Baskerville, Alfa_Slab_One } from 'next/font/google'
+import { Libre_Baskerville, Alfa_Slab_One, Inter_Tight, Instrument_Serif } from 'next/font/google'
 import { MotionConfig } from 'framer-motion'
 import Nav from '@/components/Nav'
 import { PhotoZoomProvider } from '@/components/PhotoZoomProvider'
@@ -8,6 +8,9 @@ import { PhotoZoomProvider } from '@/components/PhotoZoomProvider'
 const serif = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], style: ['normal', 'italic'], display: 'swap', variable: '--font-serif' })
 
 const display = Alfa_Slab_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-display' })
+
+const sans = Inter_Tight({ subsets: ['latin'], weight: ['500', '600'], display: 'swap', variable: '--font-sans' })
+const condensed = Instrument_Serif({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-condensed' })
 
 const description = 'Builder, photographer, curious person. Based in New York City.'
 
@@ -35,7 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${display.variable}`}>
+    <html lang="en" className={`${serif.variable} ${display.variable} ${sans.variable} ${condensed.variable}`}>
       <body>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:bg-bg focus:px-3 focus:py-2 focus:text-sm">
           Skip to content

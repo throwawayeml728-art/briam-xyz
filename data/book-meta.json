@@ -1,0 +1,72 @@
+{
+ "/books/1030140.webp": {
+  "ratio": 0.6429,
+  "edge": "#80120c",
+  "dominant": "#f8f8f8"
+ },
+ "/books/11138.webp": {
+  "ratio": 0.655,
+  "edge": "#b3c6a0",
+  "dominant": "#f8f8c8"
+ },
+ "/books/133518.webp": {
+  "ratio": 0.655,
+  "edge": "#5c5b54",
+  "dominant": "#f8f8e8"
+ },
+ "/books/1643225.webp": {
+  "ratio": 0.6475,
+  "edge": "#4e5673",
+  "dominant": "#484858"
+ },
+ "/books/1858013.webp": {
+  "ratio": 0.6975,
+  "edge": "#57595b",
+  "dominant": "#f8f8f8"
+ },
+ "/books/24724602.webp": {
+  "ratio": 0.6675,
+  "edge": "#ed0928",
+  "dominant": "#e80828"
+ },
+ "/books/249050.webp": {
+  "ratio": 0.6325,
+  "edge": "#89181a",
+  "dominant": "#f8f8f8"
+ },
+ "/books/25692144.webp": {
+  "ratio": 0.675,
+  "edge": "#c6c8b4",
+  "dominant": "#e8e8d8"
+ },
+ "/books/5.webp": {
+  "ratio": 0.6625,
+  "edge": "#a28071",
+  "dominant": "#080808"
+ },
+ "/books/54493401.webp": {
+  "ratio": 0.6625,
+  "edge": "#ab9127",
+  "dominant": "#080808"
+ },
+ "/books/6.webp": {
+  "ratio": 0.6775,
+  "edge": "#4e5a4d",
+  "dominant": "#181818"
+ },
+ "/books/6596.webp": {
+  "ratio": 0.66,
+  "edge": "#a1a72f",
+  "dominant": "#a8a828"
+ },
+ "/books/721609.webp": {
+  "ratio": 0.6475,
+  "edge": "#fffffe",
+  "dominant": "#f8f8f8"
+ },
+ "/books/81959.webp": {
+  "ratio": 0.6475,
+  "edge": "#7d4c3f",
+  "dominant": "#080808"
+ }
+}
