@@ -56,13 +56,6 @@ export const projects: Project[] = [
     image: '/projects/bike-lessons-nyc.webp',
   },
   {
-    name: 'Dog Thanksgiving NYC',
-    desc: 'A five-course, dog-safe Thanksgiving tasting menu in New York City.',
-    year: '2026',
-    url: 'https://dogsgivin3g.vercel.app',
-    image: '/projects/dogsgivin3g.webp',
-  },
-  {
     name: 'Meridian',
     desc: 'A map quiz for learning where every country is.',
     year: '2026',
