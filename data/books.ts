@@ -49,13 +49,6 @@ export const books: Book[] = [
     link: 'https://www.goodreads.com/book/show/249050',
   },
   {
-    title: 'The Four Agreements',
-    author: 'Miguel Ruiz',
-    status: 'favorite',
-    coverUrl: '/books/6596.webp',
-    link: 'https://www.goodreads.com/book/show/6596',
-  },
-  {
     title: 'Spark',
     author: 'John J. Ratey',
     status: 'favorite',
