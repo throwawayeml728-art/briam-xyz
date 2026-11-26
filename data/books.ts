@@ -42,6 +42,13 @@ export const books: Book[] = [
     link: 'https://www.goodreads.com/book/show/54493401-project-hail-mary',
   },
   {
+    title: 'East of Eden',
+    author: 'John Steinbeck',
+    status: 'favorite',
+    coverUrl: '/books/4406.webp',
+    link: 'https://www.goodreads.com/book/show/4406.East_of_Eden',
+  },
+  {
     title: 'Thoughts for Young Men',
     author: 'J.C. Ryle',
     status: 'favorite',

@@ -1,0 +1,434 @@
+:root:has(.landing) {
+  --landing-bg: #f6f5f3;
+  --landing-ink: #111111;
+  --landing-line: #e2e0dc;
+  --landing-muted: #5c574f;
+  --landing-faint: #c4c0b8;
+  --landing-blue: #2b2bff;
+  --landing-placeholder: #7a746a;
+}
+
+body:has(.landing) {
+  background: var(--landing-bg);
+  color: var(--landing-ink);
+}
+
+body:has(.landing) .site-nav {
+  display: none !important;
+}
+
+.landing {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--landing-bg);
+  color: var(--landing-ink);
+  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing-frame {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  width: min(1180px, calc(100% - 96px));
+  margin-left: 48px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  border-left: 1px solid var(--landing-line);
+  border-right: 1px solid var(--landing-line);
+}
+
+.landing-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px 28px 48px;
+  border-right: 1px solid var(--landing-line);
+}
+
+.landing-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--landing-ink);
+  color: var(--landing-bg);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.landing-nav {
+  margin-top: 88px;
+}
+
+.landing-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.landing-nav a {
+  position: relative;
+  display: inline-block;
+  padding: 5px 0 5px 12px;
+  color: var(--landing-ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.landing-nav a.is-active {
+  color: var(--landing-blue);
+  font-weight: 500;
+}
+
+.landing-nav a.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 12px;
+  background: var(--landing-blue);
+  transform: translateY(-50%);
+}
+
+.landing-nav a:not(.is-active):hover {
+  color: #333;
+}
+
+.landing-nav-box {
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--landing-ink);
+  color: var(--landing-ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  background: transparent;
+}
+
+.landing-nav-box:hover {
+  background: var(--landing-ink);
+  color: var(--landing-bg);
+}
+
+.landing-content {
+  min-width: 0;
+}
+
+.landing-hero,
+.landing-favorites {
+  position: relative;
+  padding: 120px 64px 88px 80px;
+}
+
+.landing-favorites {
+  padding-top: 72px;
+  padding-bottom: 120px;
+  border-top: 1px solid var(--landing-line);
+}
+
+.landing-num {
+  position: absolute;
+  left: 28px;
+  top: 128px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--landing-faint);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.landing-favorites .landing-num {
+  top: 80px;
+}
+
+.landing-hero h1 {
+  margin: 0 0 28px;
+  max-width: 16ch;
+  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: var(--landing-ink);
+}
+
+.landing-copy {
+  max-width: 34em;
+}
+
+.landing-copy p {
+  margin: 0 0 1em;
+  font-family: var(--landing-serif), 'Libre Baskerville', Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #1c1c1c;
+}
+
+.landing-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.landing-copy a {
+  color: var(--landing-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.landing-copy a:hover {
+  color: var(--landing-blue);
+}
+
+.landing-placeholder {
+  color: var(--landing-placeholder) !important;
+  font-style: italic;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.landing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 18px;
+  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  line-height: 1;
+  border: 1px solid var(--landing-ink);
+}
+
+.landing-btn--solid {
+  background: var(--landing-ink);
+  color: #fff;
+}
+
+.landing-btn--solid:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+.landing-btn--outline {
+  background: transparent;
+  color: var(--landing-ink);
+}
+
+.landing-btn--outline:hover {
+  background: var(--landing-ink);
+  color: #fff;
+}
+
+.landing-favorites-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 36px;
+}
+
+.landing-favorites-head h2 {
+  margin: 0;
+  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--landing-ink);
+}
+
+.landing-favorites-head a {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--landing-muted);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.landing-favorites-head a:hover {
+  color: var(--landing-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing-book-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 28px 16px;
+}
+
+.landing-book {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.landing-book-cover {
+  display: block;
+  aspect-ratio: 2 / 3;
+  background: #eceae6;
+  border: 1px solid var(--landing-line);
+  overflow: hidden;
+}
+
+.landing-book-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.landing-book-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--landing-ink);
+}
+
+.landing-book-author {
+  margin-top: -4px;
+  font-family: var(--landing-serif), 'Libre Baskerville', Georgia, serif;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--landing-muted);
+}
+
+.landing-book:hover .landing-book-title {
+  color: var(--landing-blue);
+}
+
+.landing a:focus-visible,
+.landing-btn:focus-visible,
+.landing-nav-box:focus-visible,
+.landing-logo:focus-visible {
+  outline: 2px solid var(--landing-ink);
+  outline-offset: 3px;
+}
+
+.landing-nav a.is-active:focus-visible {
+  outline-color: var(--landing-blue);
+}
+
+@media (max-width: 860px) {
+  .landing-frame {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    margin: 0 16px;
+    min-height: 100dvh;
+  }
+
+  .landing-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    padding: 18px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--landing-line);
+  }
+
+  .landing-nav {
+    margin-top: 0;
+    flex: 1 1 auto;
+  }
+
+  .landing-nav ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .landing-nav a {
+    padding: 4px 0 4px 10px;
+    font-size: 13px;
+  }
+
+  .landing-nav-box {
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .landing-hero,
+  .landing-favorites {
+    padding: 48px 16px 56px 20px;
+  }
+
+  .landing-favorites {
+    padding-top: 40px;
+    padding-bottom: 72px;
+  }
+
+  .landing-num {
+    position: static;
+    display: block;
+    margin-bottom: 12px;
+    top: auto;
+    left: auto;
+  }
+
+  .landing-favorites .landing-num {
+    top: auto;
+  }
+
+  .landing-hero h1 {
+    font-size: 32px;
+    margin-bottom: 22px;
+  }
+
+  .landing-copy p {
+    font-size: 16px;
+  }
+
+  .landing-book-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-btn,
+  .landing-nav-box,
+  .landing-book-title,
+  .landing-copy a {
+    transition: none;
+  }
+}
