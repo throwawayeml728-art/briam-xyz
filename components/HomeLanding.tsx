@@ -1,6 +1,4 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { favoriteBooks, type Book } from '@/data/books'
 
 const LINKEDIN = 'https://www.linkedin.com/in/brian-landauer/'
 const X_URL = 'https://x.com/proofofbrian'
@@ -14,19 +12,7 @@ const nav = [
   { label: 'Contact', href: '#contact' },
 ] as const
 
-function favoritesForGrid(books: Book[]): Book[] {
-  const east: Book[] = []
-  const rest: Book[] = []
-  for (const book of books) {
-    if (book.title === 'East of Eden') east.push(book)
-    else rest.push(book)
-  }
-  return [...east, ...rest]
-}
-
 export default function HomeLanding() {
-  const favorites = favoritesForGrid(favoriteBooks)
-
   return (
     <div className="landing" id="main">
       <div className="landing-frame">
@@ -100,34 +86,6 @@ export default function HomeLanding() {
             </div>
           </section>
 
-          <section className="landing-favorites" aria-labelledby="favorites-heading">
-            <span className="landing-num" aria-hidden="true">02</span>
-            <header className="landing-favorites-head">
-              <h2 id="favorites-heading">Favorite books</h2>
-              <Link href="/books">View the shelf</Link>
-            </header>
-            <ul className="landing-book-grid">
-              {favorites.map((book) => (
-                <li key={book.title}>
-                  <Link href="/books" className="landing-book">
-                    <span className="landing-book-cover">
-                      {book.coverUrl ? (
-                        <Image
-                          src={book.coverUrl}
-                          alt=""
-                          width={265}
-                          height={400}
-                          sizes="(max-width: 800px) 30vw, 140px"
-                        />
-                      ) : null}
-                    </span>
-                    <span className="landing-book-title">{book.title}</span>
-                    <span className="landing-book-author">{book.author}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
         </div>
       </div>
     </div>
