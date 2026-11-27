@@ -1,0 +1,599 @@
+:root {
+  --shell-bg: #f6f5f3;
+  --shell-ink: #111111;
+  --shell-line: #e2e0dc;
+  --shell-muted: #5c574f;
+  --shell-faint: #c4c0b8;
+  --shell-blue: #2b2bff;
+  --shell-placeholder: #7a746a;
+}
+
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--shell-bg);
+  color: var(--shell-ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell-frame {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  width: min(1180px, calc(100% - 96px));
+  margin-left: 48px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  border-left: 1px solid var(--shell-line);
+  border-right: 1px solid var(--shell-line);
+}
+
+.shell-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px 28px 48px;
+  border-right: 1px solid var(--shell-line);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  z-index: 40;
+  background: var(--shell-bg);
+}
+
+.shell-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--shell-ink);
+  color: var(--shell-bg);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.shell-nav {
+  margin-top: 88px;
+}
+
+.shell-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shell-nav a {
+  position: relative;
+  display: inline-block;
+  padding: 5px 0 5px 12px;
+  color: var(--shell-ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.shell-nav a.is-active {
+  color: var(--shell-blue);
+  font-weight: 500;
+}
+
+.shell-nav a.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 12px;
+  background: var(--shell-blue);
+  transform: translateY(-50%);
+}
+
+.shell-nav a:not(.is-active):hover {
+  color: #333;
+}
+
+.shell-nav-box {
+  margin-top: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--shell-ink);
+  color: var(--shell-ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  background: transparent;
+}
+
+.shell-nav-box:hover,
+.shell-nav-box.is-active {
+  background: var(--shell-ink);
+  color: var(--shell-bg);
+}
+
+.shell-content {
+  position: relative;
+  min-width: 0;
+  padding: 120px 64px 80px 80px;
+}
+
+.shell-num {
+  position: absolute;
+  left: 28px;
+  top: 128px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--shell-faint);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.shell-hero h1,
+.shell-page-title,
+.shell h1,
+.shell h2.shell-page-title {
+  margin: 0 0 28px;
+  max-width: 16ch;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: var(--shell-ink);
+}
+
+.shell-page-title {
+  max-width: none;
+}
+
+.shell-copy {
+  max-width: 34em;
+}
+
+.shell-copy p {
+  margin: 0 0 1em;
+  font-family: var(--font-serif), 'Libre Baskerville', Georgia, serif;
+  font-size: 16.5px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #1c1c1c;
+}
+
+.shell-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.shell-copy a {
+  color: var(--shell-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.shell-copy a:hover {
+  color: var(--shell-blue);
+}
+
+.shell-placeholder {
+  color: var(--shell-placeholder) !important;
+  font-style: italic;
+}
+
+.shell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.shell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 18px;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  line-height: 1;
+  border: 1px solid var(--shell-ink);
+}
+
+.shell-btn--solid {
+  background: var(--shell-ink);
+  color: #fff;
+}
+
+.shell-btn--solid:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+.shell-btn--outline {
+  background: transparent;
+  color: var(--shell-ink);
+}
+
+.shell-btn--outline:hover {
+  background: var(--shell-ink);
+  color: #fff;
+}
+
+/* Footer */
+.shell-footer {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 20px 28px;
+  border-top: 1px solid var(--shell-line);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--shell-muted);
+  background: var(--shell-bg);
+}
+
+.shell-footer p {
+  margin: 0;
+}
+
+.shell-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shell-footer a {
+  color: var(--shell-ink);
+  text-decoration: none;
+}
+
+.shell-footer a:hover {
+  color: var(--shell-blue);
+}
+
+/* Projects */
+.shell .project-grid {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px 24px;
+}
+
+.shell .project-card,
+.shell .project-card--link {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.shell .project-preview {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  background: #eceae6;
+  border: 1px solid var(--shell-line);
+  overflow: hidden;
+}
+
+.shell .project-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 48px;
+  font-weight: 500;
+  color: var(--shell-faint);
+  letter-spacing: -0.04em;
+}
+
+.shell .project-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shell .project-name,
+.shell .project-name span {
+  margin: 0;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--shell-ink);
+}
+
+.shell .project-year {
+  flex: none;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--shell-muted);
+}
+
+.shell .project-desc {
+  margin: 0;
+  font-family: var(--font-serif), 'Libre Baskerville', Georgia, serif;
+  font-size: 14.5px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1c1c1c;
+}
+
+.shell .project-card--link:hover .project-name,
+.shell .project-card--link:hover .project-name span {
+  color: var(--shell-blue);
+}
+
+/* Photos */
+.shell-content--photos {
+  padding: 80px 24px 48px 48px;
+}
+
+.shell-content--photos .shell-num {
+  left: 16px;
+  top: 88px;
+}
+
+.shell-content--photos .shell-page-title {
+  margin-bottom: 20px;
+}
+
+.shell .photo-section {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.shell .photo-grid-controls {
+  padding-right: 0;
+}
+
+.shell .photo-sort-toggle-label,
+.shell .photo-zoom-label,
+.shell .photo-lightbox-caption {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+}
+
+.shell .photo-tile-placeholder {
+  background: #eceae6;
+}
+
+/* Books shelf — chrome only */
+.shell-content--shelf {
+  padding: 16px 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.shell-content--shelf .shell-num {
+  left: 10px;
+  top: 22px;
+}
+
+.shell-content--shelf .vs {
+  height: calc(100dvh - 32px);
+  min-height: 480px;
+  flex: 1 1 auto;
+  color: var(--shell-ink);
+}
+
+.shell .vs-tab {
+  color: var(--shell-ink);
+}
+
+.shell .vs-tab.is-on {
+  color: #fff;
+}
+
+.shell .vs-tab-ind {
+  background: var(--shell-ink);
+}
+
+.shell .vs-tab:focus-visible,
+.shell .vs-play:focus-visible,
+.shell .vs-arrow:focus-visible,
+.shell .vs-close:focus-visible,
+.vs-close:focus-visible,
+.vs-btn:focus-visible {
+  outline-color: var(--shell-ink);
+}
+
+.shell .vs-play {
+  border-color: var(--shell-ink);
+  color: var(--shell-ink);
+  background: rgba(246, 245, 243, 0.88);
+}
+
+.shell .vs-cap-author {
+  color: var(--shell-muted);
+}
+
+/* Sheet and cursor portal to document.body, so these are unscoped */
+.vs-sheet {
+  background: var(--shell-bg);
+  color: var(--shell-ink);
+}
+
+.vs-rust {
+  color: var(--shell-ink);
+}
+
+.vs-btn {
+  border-color: var(--shell-ink);
+  background: var(--shell-ink);
+  color: #fff;
+}
+
+.vs-btn:hover {
+  background: transparent;
+  color: var(--shell-ink);
+}
+
+.vs-cursor[data-state='open']::before {
+  background-color: var(--shell-ink);
+  border-color: var(--shell-ink);
+}
+
+.shell-books-empty {
+  padding: 40px 0 80px;
+  font-family: var(--font-serif), 'Libre Baskerville', Georgia, serif;
+  font-size: 16.5px;
+  font-style: italic;
+  color: var(--shell-muted);
+}
+
+/* Focus */
+.shell a:focus-visible,
+.shell-btn:focus-visible,
+.shell-nav-box:focus-visible,
+.shell-logo:focus-visible {
+  outline: 2px solid var(--shell-ink);
+  outline-offset: 3px;
+}
+
+.shell-nav a.is-active:focus-visible {
+  outline-color: var(--shell-blue);
+}
+
+@media (max-width: 860px) {
+  .shell-frame {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    margin: 0 16px;
+    min-height: 100dvh;
+  }
+
+  .shell-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    padding: 18px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--shell-line);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 0;
+    align-self: stretch;
+  }
+
+  .shell-nav {
+    margin-top: 0;
+    flex: 1 1 auto;
+  }
+
+  .shell-nav ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .shell-nav a {
+    padding: 4px 0 4px 10px;
+    font-size: 13px;
+  }
+
+  .shell-nav-box {
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .shell-content {
+    padding: 48px 16px 56px 20px;
+  }
+
+  .shell-num {
+    position: static;
+    display: block;
+    margin-bottom: 12px;
+    top: auto;
+    left: auto;
+  }
+
+  .shell-hero h1,
+  .shell-page-title,
+  .shell h1,
+  .shell h2.shell-page-title {
+    font-size: 32px;
+    margin-bottom: 22px;
+  }
+
+  .shell-copy p {
+    font-size: 16px;
+  }
+
+  .shell .project-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .shell-content--photos {
+    padding: 32px 0 40px;
+  }
+
+  .shell-content--photos .shell-num,
+  .shell-content--shelf .shell-num {
+    position: static;
+    margin-bottom: 12px;
+  }
+
+  .shell-content--shelf {
+    padding: 12px 0 24px;
+  }
+
+  .shell-content--shelf .vs {
+    height: calc(100dvh - 150px);
+    min-height: 420px;
+  }
+
+  .shell-footer {
+    padding: 16px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-btn,
+  .shell-nav-box,
+  .shell-copy a,
+  .shell .project-name,
+  .shell .project-name span {
+    transition: none;
+  }
+}

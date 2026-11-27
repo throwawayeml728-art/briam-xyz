@@ -1,14 +1,18 @@
 import Link from 'next/link'
-import Stipple from '@/components/Stipple'
+import SiteShell from '@/components/SiteShell'
 
 export default function NotFound() {
   return (
-    <main className="not-found">
-      <h1>Page not found</h1>
-      <p>That page doesn&rsquo;t exist.</p>
-      <Link href="/">Back home</Link>
-      <Stipple name="road-valley" className="stipple--404" />
-      <Stipple name="cowboy-standing" className="stipple--standing" />
-    </main>
+    <SiteShell number="404">
+      <section className="shell-hero" aria-labelledby="not-found-title">
+        <h1 id="not-found-title">Page not found</h1>
+        <div className="shell-copy">
+          <p>That page doesn&rsquo;t exist.</p>
+        </div>
+        <div className="shell-actions">
+          <Link href="/" className="shell-btn shell-btn--solid">Back home</Link>
+        </div>
+      </section>
+    </SiteShell>
   )
 }

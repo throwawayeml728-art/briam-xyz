@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import Footer from '@/components/Footer'
-import Stipple from '@/components/Stipple'
+import SiteShell from '@/components/SiteShell'
 import VhsShelf, { type ShelfBook } from '@/components/VhsShelf'
 import { readingBooks, favoriteBooks } from '@/data/books'
 import { resolveCover } from '@/lib/covers'
@@ -21,21 +20,19 @@ export default async function BooksPage() {
 
   if (!books.length) {
     return (
-      <main id="main" className="page-main">
-        <div className="books-empty">
-          <Stipple name="cowboy-rider" className="stipple--books-empty" />
-          <p>The shelf is being dusted off. Check back soon.</p>
-        </div>
-        <Footer />
-      </main>
+      <SiteShell number="01">
+        <section className="shell-page" aria-labelledby="books-title">
+          <h1 id="books-title" className="shell-page-title">Books</h1>
+          <p className="shell-books-empty">The shelf is being dusted off. Check back soon.</p>
+        </section>
+      </SiteShell>
     )
   }
 
   return (
-    <main id="main" className="page-main page-main--vhs">
+    <SiteShell number="01" footer={false} contentClassName="shell-content--shelf">
       <h1 className="sr-only">On the Shelf: books Brian is reading now and old favorites</h1>
       <VhsShelf books={books} />
-      <Footer />
-    </main>
+    </SiteShell>
   )
 }

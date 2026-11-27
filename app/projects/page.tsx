@@ -1,16 +1,16 @@
 import type { Metadata } from 'next'
 import Projects from '@/components/Projects'
-import Footer from '@/components/Footer'
-import Stipple from '@/components/Stipple'
+import SiteShell from '@/components/SiteShell'
 
 export const metadata: Metadata = { title: 'Projects', openGraph: { title: 'Projects' } }
 
 export default function ProjectsPage() {
   return (
-    <main id="main" className="page-main page-main--projects">
-      <Projects />
-      <Footer />
-      <Stipple name="hoodoo-corner" className="stipple--projects-margin" />
-    </main>
+    <SiteShell number="01">
+      <section className="shell-page" aria-labelledby="projects-title">
+        <h1 id="projects-title" className="shell-page-title">Projects</h1>
+        <Projects />
+      </section>
+    </SiteShell>
   )
 }

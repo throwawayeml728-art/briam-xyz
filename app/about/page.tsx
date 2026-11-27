@@ -1,46 +1,53 @@
 import type { Metadata } from 'next'
-import Footer from '@/components/Footer'
-import Stipple from '@/components/Stipple'
-import { siteConfig, workHistory } from '@/data/content'
+import SiteShell from '@/components/SiteShell'
 
-export const metadata: Metadata = { title: 'About · Brian Landauer', openGraph: { title: 'About · Brian Landauer' } }
+const LINKEDIN = 'https://www.linkedin.com/in/brian-landauer/'
+const X_URL = 'https://x.com/proofofbrian'
+const EMAIL = 'mailto:hello@fifthdegree.xyz'
+
+export const metadata: Metadata = { title: 'About', openGraph: { title: 'About' } }
 
 export default function AboutPage() {
   return (
-    <main id="main" className="page-main">
-      <div>
-        <div className="about-intro">
-          <Stipple name="hoodoo-corner" className="stipple--about" />
-          <h1>About</h1>
-          <p>{siteConfig.tagline} Based in {siteConfig.location}.</p>
+    <SiteShell number="01">
+      <section className="shell-hero" aria-labelledby="about-title">
+        <h1 id="about-title">About</h1>
+        <div className="shell-copy">
+          <p>
+            I&apos;m Brian Landauer, based in New York City. I take photographs, build things, and keep a running list of what I&apos;m reading.
+          </p>
+          <p>
+            You can find me on{' '}
+            <a href={X_URL} target="_blank" rel="noopener noreferrer">
+              X
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>{' '}
+            and{' '}
+            <a href={LINKEDIN} target="_blank" rel="noopener noreferrer">
+              LinkedIn
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            .
+          </p>
+          <p className="shell-placeholder">
+            [Placeholder: a short paragraph about you — interests, what this site is for, or anything you&apos;d like people to know. Replace this.]
+          </p>
         </div>
-        <section className="site-section about-work" style={{ maxWidth: '1100px', margin: '0 auto' }} aria-labelledby="work-heading">
-          <Stipple name="cowboy-pair" className="stipple--pair" />
-          <h2 id="work-heading" className="section-label" style={{ margin: 0, paddingBottom: '16px' }}>
-            Work
-          </h2>
-          {workHistory.length === 0 ? (
-            <p className="work-empty">Work history coming soon.</p>
-          ) : (
-            <ul className="work-list">
-              {workHistory.map((w) => (
-                <li key={`${w.company}-${w.start}`} className="work-row">
-                  <span className="work-years">{w.start} – {w.end ?? 'Present'}</span>
-                  <div>
-                    <h3 className="work-title">
-                      {w.role} <span className="work-company">·{' '}
-                        {w.url ? <a href={w.url} target="_blank" rel="noopener noreferrer">{w.company}<span className="sr-only"> (opens in a new tab)</span></a> : w.company}
-                      </span>
-                    </h3>
-                    {w.desc && <p className="work-desc">{w.desc}</p>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-      <Footer />
-    </main>
+        <div className="shell-actions">
+          <a className="shell-btn shell-btn--solid" href={EMAIL}>
+            Get in touch
+          </a>
+          <a
+            className="shell-btn shell-btn--outline"
+            href={X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Follow on X
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        </div>
+      </section>
+    </SiteShell>
   )
 }

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import './site-shell.css'
 import { Libre_Baskerville, Alfa_Slab_One, Inter_Tight, Instrument_Serif } from 'next/font/google'
 import { MotionConfig } from 'framer-motion'
-import Nav from '@/components/Nav'
 import { PhotoZoomProvider } from '@/components/PhotoZoomProvider'
 
 const serif = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], style: ['normal', 'italic'], display: 'swap', variable: '--font-serif' })
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#f3ead9',
+  themeColor: '#f6f5f3',
 }
 
 export const metadata: Metadata = {
@@ -45,7 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <MotionConfig reducedMotion="user">
           <PhotoZoomProvider>
-            <Nav />
             {children}
           </PhotoZoomProvider>
         </MotionConfig>

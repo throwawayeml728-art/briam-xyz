@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import HomeLanding from '@/components/HomeLanding'
-import './home-landing.css'
 
 export const viewport: Viewport = {
   themeColor: '#f6f5f3',

@@ -1,3 +1,3 @@
 export default function Loading() {
-  return <div className="page-main" role="status" aria-label="Loading" />
+  return <div className="shell" role="status" aria-label="Loading" />
 }

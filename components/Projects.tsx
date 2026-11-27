@@ -1,9 +1,7 @@
 'use client'
 import Image from 'next/image'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { projects, type Project } from '@/data/content'
-import Stipple from '@/components/Stipple'
 
 function ProjectCard({ project, i }: { project: Project; i: number }) {
   const inner = (
@@ -14,7 +12,7 @@ function ProjectCard({ project, i }: { project: Project; i: number }) {
             src={project.image}
             alt={`Preview of ${project.name}`}
             fill
-            sizes="(max-width: 639px) 100vw, (max-width: 999px) 50vw, 350px"
+            sizes="(max-width: 859px) 100vw, 420px"
             quality={75}
             style={{ objectFit: 'cover', objectPosition: 'top' }}
           />
@@ -23,7 +21,7 @@ function ProjectCard({ project, i }: { project: Project; i: number }) {
         )}
       </span>
       <span className="project-meta">
-        <h3 className="project-name"><span>{project.name}</span></h3>
+        <h2 className="project-name"><span>{project.name}</span></h2>
         <span className="project-year">{project.year}</span>
       </span>
       <p className="project-desc">{project.desc}</p>
@@ -39,6 +37,7 @@ function ProjectCard({ project, i }: { project: Project; i: number }) {
       {project.url ? (
         <a href={project.url} target="_blank" rel="noopener noreferrer" className="project-card project-card--link">
           {inner}
+          <span className="sr-only"> (opens in a new tab)</span>
         </a>
       ) : (
         <div className="project-card">{inner}</div>
@@ -47,28 +46,10 @@ function ProjectCard({ project, i }: { project: Project; i: number }) {
   )
 }
 
-export default function Projects({ viewAllHref }: { viewAllHref?: string } = {}) {
+export default function Projects() {
   return (
-    <section
-      id="projects"
-      className="site-section"
-      style={{ maxWidth: '1100px', margin: '0 auto' }}
-    >
-      <div
-        className="projects-heading"
-        style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--rule)' }}
-      >
-        <Stipple name="merrick-butte" className={`stipple--projects-heading${viewAllHref ? '' : ' stipple--projects-heading-page'}`} />
-        <h2 className="section-label" style={{ margin: 0 }}>
-          Projects
-        </h2>
-        {viewAllHref && (
-          <Link href={viewAllHref} className="home-link">All projects</Link>
-        )}
-      </div>
-      <ul className="project-grid">
-        {projects.map((p, i) => <ProjectCard key={p.name} project={p} i={i} />)}
-      </ul>
-    </section>
+    <ul className="project-grid">
+      {projects.map((p, i) => <ProjectCard key={p.name} project={p} i={i} />)}
+    </ul>
   )
 }

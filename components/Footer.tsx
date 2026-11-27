@@ -1,48 +1,33 @@
-import Link from 'next/link'
-import { siteConfig } from '@/data/content'
-import Stipple from '@/components/Stipple'
+const LINKEDIN = 'https://www.linkedin.com/in/brian-landauer/'
+const X_URL = 'https://x.com/proofofbrian'
+const EMAIL = 'mailto:hello@fifthdegree.xyz'
 
-const socialLinks = [
-  ['LinkedIn', siteConfig.social.linkedin],
-  ['Events', siteConfig.social.luma],
-  ['Email', `mailto:${siteConfig.email}`],
+const links = [
+  ['LinkedIn', LINKEDIN, true],
+  ['X', X_URL, true],
+  ['Email', EMAIL, false],
 ] as const
 
 export default function Footer() {
   return (
-    <>
-    <div className="footer-horizon" aria-hidden="true">
-      <Stipple name="horizon-mesas" />
-      <Stipple name="cowboy-rider" className="stipple--rider" />
-    </div>
-    <footer className="site-footer">
-      <div className="site-footer-main">
-        <p className="site-footer-tagline">
-          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0l1.4 4.6L12 6 7.4 7.4 6 12 4.6 7.4 0 6l4.6-1.4z" /></svg>
-          Arizona born
-        </p>
-        <p className="site-footer-copy">
-          © {new Date().getFullYear()} {siteConfig.name} · {siteConfig.domain}
-        </p>
-      </div>
-      <nav className="site-footer-links" aria-label="Social links">
-        <Link href="/about">About</Link>
-        {socialLinks.map(([label, href]) => {
-          const external = !href.startsWith('mailto:')
-          return (
-            <a
-              key={label}
-              href={href}
-              target={external ? '_blank' : undefined}
-              rel={external ? 'noopener noreferrer' : undefined}
-            >
-              {label}
-              {external && <span className="sr-only"> (opens in a new tab)</span>}
-            </a>
-          )
-        })}
+    <footer className="shell-footer">
+      <p>© {new Date().getFullYear()} Brian Landauer</p>
+      <nav aria-label="Social links">
+        <ul className="shell-footer-links">
+          {links.map(([label, href, external]) => (
+            <li key={label}>
+              <a
+                href={href}
+                target={external ? '_blank' : undefined}
+                rel={external ? 'noopener noreferrer' : undefined}
+              >
+                {label}
+                {external && <span className="sr-only"> (opens in a new tab)</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
       </nav>
     </footer>
-    </>
   )
 }

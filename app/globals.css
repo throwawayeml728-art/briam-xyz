@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f3ead9;        /* sandstone / parchment */
-  --bg-deep: #eadcc0;
-  --fg: #2b1d14;        /* deep umber */
-  --muted: #6a5543;     /* dry-adobe brown, AA on bg */
-  --rule: #cdb994;      /* hairline */
-  --rust: #9a3f1f;      /* terracotta / rust, AA on bg */
-  --leather: #4a2e1c;   /* saddle brown */
+  --bg: #f6f5f3;
+  --bg-deep: #efece7;
+  --fg: #111111;
+  --muted: #5c574f;
+  --rule: #e2e0dc;
+  --rust: #111111;
+  --leather: #111111;
   --sage: #55674a;
   --turquoise: #2f7d7a;
 }
@@ -22,7 +22,7 @@ body {
   font-family: var(--font-serif), Georgia, serif;
   line-height: 1.5;
 }
-::selection { background: var(--rust); color: #fff8ea; }
+::selection { background: #111; color: #fff; }
 
 .site-nav {
   padding: 0 48px;
@@ -1166,3 +1166,7 @@ html.vs-locked { overflow: hidden; }
 /* ALL: face-out grid may run past the hero band on small screens */
 .vs.is-grid { overflow-x: clip; overflow-y: visible; }
 .vs.is-grid .vs-shelf { cursor: default; }
+
+
+/* western chrome hidden — the shared shell replaces it */
+.stipple, .footer-horizon { display: none !important; }
