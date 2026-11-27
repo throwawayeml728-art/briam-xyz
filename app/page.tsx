@@ -1,32 +1,16 @@
-import Link from 'next/link'
-import PhotoGrid from '@/components/PhotoGrid'
-import Projects from '@/components/Projects'
-import Footer from '@/components/Footer'
-import Stipple from '@/components/Stipple'
-import ReadingTeaser from '@/components/ReadingTeaser'
-import { getPhotos } from '@/lib/photos'
+import type { Metadata, Viewport } from 'next'
+import HomeLanding from '@/components/HomeLanding'
+import './home-landing.css'
 
-export const dynamic = 'force-dynamic'
+export const viewport: Viewport = {
+  themeColor: '#f6f5f3',
+}
 
-const HOME_PHOTO_COUNT = 43 // show every photo
+export const metadata: Metadata = {
+  title: { absolute: 'Brian Landauer' },
+  description: 'Brian Landauer, based in New York City.',
+}
 
 export default function Home() {
-  const photos = getPhotos().slice(0, HOME_PHOTO_COUNT)
-
-  return (
-    <main id="main" className="home-main">
-      <div className="home-content">
-        <div id="photography" className="home-anchor" />
-        <div className="home-heading">
-          <Stipple name="butte-mitten" className="stipple--photo-heading" />
-          <h2>Photography</h2>
-          <Link href="/photos" className="home-link">View all <span aria-hidden="true">→</span></Link>
-        </div>
-        <PhotoGrid photos={photos} />
-        <Projects viewAllHref="/projects" />
-        <ReadingTeaser />
-        <Footer />
-      </div>
-    </main>
-  )
+  return <HomeLanding />
 }

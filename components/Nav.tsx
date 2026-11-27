@@ -6,20 +6,20 @@ import { hasBooks } from '@/data/books'
 
 const links = [
   ['Home', '/'],
-  ['Photos', '/photos', '/#photography'],
-  ['Projects', '/projects', '/#projects'],
+  ['Photos', '/photos'],
+  ['Projects', '/projects'],
   ...(hasBooks ? [['Books', '/books'] as const] : []),
   ['About', '/about'],
-] as readonly (readonly [string, string, string?])[]
+] as readonly (readonly [string, string])[]
 
 export default function Nav() {
   const pathname = usePathname()
-  const isHome = pathname === '/'
+  if (pathname === '/') return null
 
   return (
     <nav
       aria-label="Primary"
-      className={`site-nav${isHome ? ' site-nav--home' : ' site-nav--page'}`}
+      className="site-nav site-nav--page"
       style={{
         position: 'fixed',
         top: 0, left: 0, right: 0,
@@ -30,20 +30,16 @@ export default function Nav() {
       }}
     >
       <ul className="site-nav-links" style={{ display: 'flex', gap: '32px', listStyle: 'none', margin: 0, padding: 0 }}>
-        {links.filter(([, href]) => !isHome || href !== '/').map(([label, href, homeHref]) => {
+        {links.map(([label, href]) => {
           const active = href === '/'
             ? pathname === '/'
             : pathname === href || pathname.startsWith(`${href}/`)
           return (
             <li key={label}>
               <Link
-                href={isHome && homeHref ? homeHref : href}
+                href={href}
                 aria-current={active ? 'page' : undefined}
-                className={[
-                  'site-nav-link',
-                  active ? 'site-nav-link--active' : '',
-                  isHome ? 'site-nav-link--home' : '',
-                ].filter(Boolean).join(' ')}
+                className={['site-nav-link', active ? 'site-nav-link--active' : ''].filter(Boolean).join(' ')}
               >
                 {label}
               </Link>

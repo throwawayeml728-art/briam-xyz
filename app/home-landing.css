@@ -22,7 +22,7 @@ body:has(.landing) .site-nav {
   min-height: 100dvh;
   background: var(--landing-bg);
   color: var(--landing-ink);
-  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -161,7 +161,7 @@ body:has(.landing) .site-nav {
 .landing-hero h1 {
   margin: 0 0 28px;
   max-width: 16ch;
-  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 40px;
   font-weight: 500;
   letter-spacing: -0.035em;
@@ -175,7 +175,7 @@ body:has(.landing) .site-nav {
 
 .landing-copy p {
   margin: 0 0 1em;
-  font-family: var(--landing-serif), 'Libre Baskerville', Georgia, serif;
+  font-family: var(--font-serif), 'Libre Baskerville', Georgia, serif;
   font-size: 16.5px;
   font-weight: 400;
   line-height: 1.7;
@@ -215,7 +215,7 @@ body:has(.landing) .site-nav {
   justify-content: center;
   height: 40px;
   padding: 0 18px;
-  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -254,7 +254,7 @@ body:has(.landing) .site-nav {
 
 .landing-favorites-head h2 {
   margin: 0;
-  font-family: var(--landing-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -323,7 +323,7 @@ body:has(.landing) .site-nav {
 
 .landing-book-author {
   margin-top: -4px;
-  font-family: var(--landing-serif), 'Libre Baskerville', Georgia, serif;
+  font-family: var(--font-serif), 'Libre Baskerville', Georgia, serif;
   font-size: 12px;
   font-style: italic;
   font-weight: 400;

@@ -7,7 +7,7 @@ const X_URL = 'https://x.com/proofofbrian'
 const EMAIL = 'mailto:hello@fifthdegree.xyz'
 
 const nav = [
-  { label: 'Home', href: '/landing' },
+  { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
   { label: 'Projects', href: '/projects' },
   { label: 'Photos', href: '/photos' },
@@ -24,20 +24,20 @@ function favoritesForGrid(books: Book[]): Book[] {
   return [...east, ...rest]
 }
 
-export default function LandingPage() {
+export default function HomeLanding() {
   const favorites = favoritesForGrid(favoriteBooks)
 
   return (
     <div className="landing" id="main">
       <div className="landing-frame">
         <aside className="landing-sidebar">
-          <Link href="/landing" className="landing-logo" aria-label="Brian Landauer home">
+          <Link href="/" className="landing-logo" aria-label="Brian Landauer home">
             <span aria-hidden="true">BL</span>
           </Link>
-          <nav className="landing-nav" aria-label="Landing">
+          <nav className="landing-nav" aria-label="Primary">
             <ul>
               {nav.map((item) => {
-                const active = item.href === '/landing'
+                const active = item.href === '/'
                 return (
                   <li key={item.label}>
                     <Link

@@ -9,10 +9,10 @@ const serif = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], st
 
 const display = Alfa_Slab_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-display' })
 
-const sans = Inter_Tight({ subsets: ['latin'], weight: ['500', '600'], display: 'swap', variable: '--font-sans' })
+const sans = Inter_Tight({ subsets: ['latin'], weight: ['400', '500', '600'], display: 'swap', variable: '--font-sans' })
 const condensed = Instrument_Serif({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-condensed' })
 
-const description = 'Builder, photographer, curious person. Based in New York City.'
+const description = 'Brian Landauer, based in New York City.'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     url: 'https://fifthdegree.xyz',
     siteName: 'Brian Landauer',
     type: 'website',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Brian Landauer — builder, photographer, curious person' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Brian Landauer, based in New York City.' }],
   },
   twitter: { card: 'summary_large_image', title: 'Brian Landauer', description, images: ['/og.jpg'] },
 }
